@@ -21,5 +21,5 @@ echo
 echo "Installing python package requirements"
 echo
 
-pip install -r python-package-requirements.txt
+pip install -r antmaps_dataserver/python-package-requirements.txt
 
