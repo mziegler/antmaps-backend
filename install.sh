@@ -6,6 +6,7 @@ echo
 
 echo "Make sure you've installed Python 3.x  https://www.python.org/downloads/"
 echo "And you've installed virtualenv  https://virtualenv.pypa.io/en/latest/installation.html"
+echo "And you've installed psycopg2 (for python3)  http://initd.org/psycopg/docs/install.html#installation"
 echo
 
 if [ ! -d ENV ]; then

@@ -16,6 +16,13 @@ BASE_DIR = os.path.dirname(os.path.dirname(__file__))
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/1.7/howto/deployment/checklist/
 
+
+# WARNING!
+# This (not-so) secret key is currently publicly available on Github.  That's okay
+# for now, because this app doesn't need to do anything secure, but if that changes,
+# (eg. we start having authentication and user accounts,) make sure to change the
+# secret key and keep the new key out of Github (put in a separate file).
+
 # SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = '4$+@f2c752oqe1fiivax_arjr9awpd(*t1)0&25c#3p!b3j#_n'
 
@@ -58,8 +65,20 @@ WSGI_APPLICATION = 'antmaps_dataserver.wsgi.application'
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
+        'ENGINE': 'django.db.backends.postgresql_psycopg2',
+        
+        # get connection parameters from environment variables
+        'NAME': os.environ['ANTMAPS_DB_NAME'],
+        'HOST': os.environ['ANTMAPS_DB_HOST'],
+        'PORT': os.environ['ANTMAPS_DB_PORT'],
+        'USER': os.environ['ANTMAPS_DB_USER'],
+        'PASSWORD': os.environ['ANTMAPS_DB_PASSWORD'],
+        
+        # for postgres connection optimization
+        'timezone': 'UTC',
+        'client_encoding': 'UTF8',
+        'default_transaction_isolation': 'read committed',
+        
     }
 }
 

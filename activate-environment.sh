@@ -7,4 +7,17 @@ echo
 
 source ENV/bin/activate 
 
-# export environment variables here
+
+# set environment variables here
+
+# IMPORTANT!  Set ANTMAPS_DEBUG to false (or don't set at all) in production
+export ANTMAPS_DEBUG=true
+
+# IMPORTANT!  This file is published publically to Github, so don't put any sensitive
+# passwords here.  Use this file for dummy development database only.
+# (Put production settings in a different, unpublished file)
+export ANTMAPS_DB_NAME="antmaps"
+export ANTMAPS_DB_HOST="127.0.0.1"
+export ANTMAPS_DB_PORT="5432"
+export ANTMAPS_DB_USER="antmaps"
+export ANTMAPS_DB_PASSWORD="password"
