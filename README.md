@@ -1,0 +1,37 @@
+Antmaps backend
+========================
+Django project
+
+
+Installation
+------------
+
+To install the Antmaps backend locally on your own machine for development, first you need to install the following:
+
+* Python 3.x  https://www.python.org/downloads/   (Developed using Python 3.4)
+* Virtualenv for Python https://virtualenv.pypa.io/en/latest/installation.html
+* psycopg2 (for python3)  http://initd.org/psycopg/docs/install.html#installation
+
+Then, clone this git repository, and in a shell run **./install.sh** to set up virtualenv and install Python packages.
+
+If you get an error saying something like install.sh isn't executable, run " chmod +x activate-environment.sh run-development-server.sh install.sh " in a terminal.
+
+**Note about psycopg2:** I (Matt) had some trouble getting psycopg2 running on my Ubuntu machine.  The python3-psycopg2 apt package didn't work for unknown reason.  I ended up installing it through Pypi, and it requires the 'python3-dev' and 'libpq-dev' apt packages, as well as a C compiler as it's a C program that needs to be built from source when installing from Pypi.  The /install.sh will attempt to install psycopg2 from Pypi, if you've already installed psycopg2 from other means ignore the error messages that it produces.
+
+
+Setting up database connection
+------------------------------
+The Antmaps backend needs to connect to a Postgres database.  Connection parameters are stored in /activate-environment.sh.
+
+
+Running development server
+--------------------------
+You can run the Antmaps-backend locally for development in a simple HTTP server by running **./run-development-server.sh**
+
+
+Django management tasks
+-----------------------
+For Django management tasks, you first need to activate the development environment (start virtualenv and set environment variables) by running **./activate-environment.sh**
+
+Django has a management utility found at: /antmaps_dataserver/manage.py .
+See https://docs.djangoproject.com/en/1.7/ref/django-admin/
