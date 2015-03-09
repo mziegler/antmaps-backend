@@ -10,8 +10,9 @@ source ENV/bin/activate
 
 # set environment variables here
 
-# IMPORTANT!  Set ANTMAPS_DEBUG to false (or don't set at all) in production
+# IMPORTANT!  Set ANTMAPS_DEBUG to false (or don't set at all) in production.
 export ANTMAPS_DEBUG=true
+
 
 # IMPORTANT!  This file is published publically to Github, so don't put any sensitive
 # passwords here.  Use this file for dummy development database only.

@@ -27,7 +27,8 @@ BASE_DIR = os.path.dirname(os.path.dirname(__file__))
 SECRET_KEY = '4$+@f2c752oqe1fiivax_arjr9awpd(*t1)0&25c#3p!b3j#_n'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = os.environ.get('ANTMAPS_DEBUG')
+
 
 TEMPLATE_DEBUG = True
 
@@ -42,8 +43,9 @@ INSTALLED_APPS = (
     'django.contrib.contenttypes',
     'django.contrib.sessions',
     'django.contrib.messages',
-    'django.contrib.staticfiles',
+    #'django.contrib.staticfiles',
 )
+
 
 MIDDLEWARE_CLASSES = (
     'django.contrib.sessions.middleware.SessionMiddleware',
@@ -55,7 +57,15 @@ MIDDLEWARE_CLASSES = (
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 )
 
-ROOT_URLCONF = 'antmaps_dataserver.urls'
+
+# If in debug mode, use a special URLconf that 1) serves static files, and 2)
+# prepends a "dataserver/" to Django URL views.  In production, we should do this
+# with Apache.
+if DEBUG:
+    ROOT_URLCONF = 'antmaps_dataserver.urls_debug'
+else:
+    ROOT_URLCONF = 'antmaps_dataserver.urls'
+
 
 WSGI_APPLICATION = 'antmaps_dataserver.wsgi.application'
 
@@ -99,4 +109,8 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/1.7/howto/static-files/
 
-STATIC_URL = '/static/'
+# serve static files from root URL (for in debug mode only)
+STATIC_URL = '/'
+
+# serve /antmaps-app as static files (debug mode only)
+STATICFILES_DIRS = (os.path.join(BASE_DIR, '..', '..', 'antmaps-app'),)
