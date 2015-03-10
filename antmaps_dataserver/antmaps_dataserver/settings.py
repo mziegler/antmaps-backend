@@ -118,4 +118,4 @@ USE_TZ = True
 STATIC_URL = '/'
 
 # serve /antmaps-app as static files (debug mode only)
-STATICFILES_DIRS = (os.path.join(BASE_DIR, '..', '..', 'antmaps-app'),)
+STATICFILES_DIRS = (os.path.join(BASE_DIR, '..', 'static'),)

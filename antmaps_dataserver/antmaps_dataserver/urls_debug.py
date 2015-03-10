@@ -15,7 +15,7 @@ from django.conf.urls import patterns, include, url
 from django.contrib.staticfiles.urls import staticfiles_urlpatterns
 from django.shortcuts import redirect
 
-urlpatterns = patterns('',
+urlpatterns = [
   # Examples:
   # url(r'^$', 'antmaps_dataserver.views.home', name='home'),
   # url(r'^blog/', include('blog.urls')),
@@ -27,5 +27,5 @@ urlpatterns = patterns('',
   # redirect empty URL to index.html
   url(r'^$', lambda request: redirect('/index.html')),
   
-) + staticfiles_urlpatterns()
+] + staticfiles_urlpatterns()
 
