@@ -1,6 +1,4 @@
 django==1.7
 
-djangorestframework==3.0.5
-
 # postgres connector 
 psycopg2==2.6

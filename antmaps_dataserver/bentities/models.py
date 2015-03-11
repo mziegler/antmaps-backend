@@ -10,5 +10,5 @@ class Bentity(models.Model):
   
   class Meta:
     managed = False
-    db_table = 'bentities_jan2015_highres'
+    db_table = 'bentities_highres'
 

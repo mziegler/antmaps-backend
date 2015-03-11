@@ -1,4 +1,10 @@
-from django.shortcuts import render
+"""
+A function for finding the bentities within a bounding box, and a view for
+returning polygons of bentities in a bounding box.
+"""
+
+
+from django.http import HttpResponse
 from django.contrib.gis.geos import Polygon # for bounding box
 
 from bentities.models import Bentity
@@ -20,3 +26,20 @@ def bentities_in_boundingbox(xmin, ymin, xmax, ymax):
     return Bentity.objects.filter(geog__bboverlaps=geom)
   
 
+"""
+We don't actually need a view to return bentities as geoJSON anymore
+
+from djgeojson.serializers import Serializer as GeoJSONSerializer
+def bentity_polygons(request):
+    
+    try:
+        bbox = [float(bound) for bound in request.GET['bbox'].split(',')]
+    except (AttributeError, ValueError):
+        bbox = [-180, -90, 180, 90] # use whole globe if no bbox provided
+        
+    bentities = bentities_in_boundingbox(*bbox)
+    
+    geojson = GeoJSONSerializer().serialize(bentities, geometry_field='geog', precision=8, simplify=0.5)
+    
+    return HttpResponse(geojson)
+"""    
