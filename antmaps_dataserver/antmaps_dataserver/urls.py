@@ -1,6 +1,7 @@
 from django.conf.urls import patterns, include, url
 
 #import bentities.views
+import speciesmode.views
 
 urlpatterns = [
     # Examples:
@@ -9,4 +10,9 @@ urlpatterns = [
     # url(r'^admin/', include(admin.site.urls)),
     
     #url(r'^bentities', bentities.views.bentity_polygons),
+    
+    # for populating taxon select boxes
+    url(r'^subfamily-list', speciesmode.views.subfamily_list),
+    url(r'^genus-list', speciesmode.views.genus_list),
+    url(r'^species-list', speciesmode.views.species_list),
 ]
