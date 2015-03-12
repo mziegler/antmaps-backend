@@ -12,11 +12,16 @@ To install the Antmaps backend locally on your own machine for development, firs
 * Virtualenv for Python https://virtualenv.pypa.io/en/latest/installation.html
 * psycopg2 (for python3)  http://initd.org/psycopg/docs/install.html#installation
 
-Then, clone this git repository, and in a shell run **./install.sh** to set up virtualenv and install Python packages.
+Then, clone this git repository with "git clone --recursive", and in a shell run **./install.sh** to set up virtualenv and install Python packages.
 
 If you get an error saying something like install.sh isn't executable, run " chmod +x activate-environment.sh run-development-server.sh install.sh " in a terminal.
 
 **Note about psycopg2:** I (Matt) had some trouble getting psycopg2 running on my Ubuntu machine.  The python3-psycopg2 apt package didn't work for unknown reason.  I ended up installing it through Pypi, and it requires the 'python3-dev' and 'libpq-dev' apt packages, as well as a C compiler as it's a C program that needs to be built from source when installing from Pypi.  The /install.sh will attempt to install psycopg2 from Pypi, if you've already installed psycopg2 from other means ignore the error messages that it produces.
+
+
+Note about git submodules
+-------------------------
+This git repository has a pointer to the antmaps frontend repository (antmaps-app), as the folder called "antmaps_frontend."  When you do a "git clone", use the "--recursive" option to automatically clone the submodules.  **When you do a "git pull", always also do a "git submodule update"** to update the front-end submodule.
 
 
 Setting up database connection
