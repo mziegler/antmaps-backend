@@ -81,7 +81,10 @@ def species_list(request):
                     .filter(genus_name=request.GET.get('genus'))
                     .order_by('species_name') )
                     
-        json_objects = [{'key': s.taxon_code, 'display': (s.genus_name_text + ' ' + s.species_name)} for s in species]
+        json_objects = [{
+            'key': s.taxon_code, 
+            'display': (s.genus_name_text + ' ' + s.species_name + ' ' + s.subspecies_name)
+          } for s in species]
         
     else:
         json_objects = []
