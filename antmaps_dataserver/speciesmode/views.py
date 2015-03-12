@@ -6,7 +6,7 @@ import json
 
 from django.http import HttpResponse
 
-from speciesmode.models import Subfamily, Genus, Species
+from speciesmode.models import Subfamily, Genus, Species, Record
 
 
 
@@ -83,10 +83,36 @@ def species_list(request):
                     
         json_objects = [{
             'key': s.taxon_code, 
-            'display': (s.genus_name_text + ' ' + s.species_name + ' ' + s.subspecies_name)
+            'display': (s.genus_name_text + ' ' + s.species_name + ' ' + (s.subspecies_name or ''))
           } for s in species]
         
+        return JSONResponse({'species': json_objects})
+    
     else:
-        json_objects = []
+        return JSONResponse({'species': [], 'message': "Please supply a 'genus' in the URL query string."})
+            
         
-    return JSONResponse({'species': json_objects})
+    
+def species_points(request):
+    """
+    Return a JSON response with a list of geo points for a species.  For each record,
+    include a {gabi_acc_number:xxx, lat:xxx, lon:xxx} object.
+    
+    A "taxon_code" must be provided in the URL query string, to specify the species.
+    """
+    
+    if request.GET.get('taxon_code'):
+        records = ( Record.objects
+            .filter(taxon_code=request.GET.get('taxon_code'))
+            .filter(lon__isnull=False) )
+        
+        json_objects = [{
+            'gabi_acc_number': r.gabi_acc_number,
+            'lat': r.lat,
+            'lon': r.lon,
+        } for r in records]
+        
+        return JSONResponse({'records': json_objects})
+    
+    else: # punt if the request doesn't have a taxon_code
+        return JSONResponse({'records': [], 'message': "Please supply a 'taxon_code' in the URL query string."})

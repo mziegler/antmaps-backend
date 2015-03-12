@@ -3,8 +3,8 @@ Subfamily, Genus, and Species models are currently just used for populating taxo
 select boxes.
 """
 
-
 from django.db import models
+
 
 
 class Subfamily(models.Model):
@@ -37,4 +37,20 @@ class Species(models.Model):
     class Meta:
         managed = False
         db_table = 'species'
+        
+
+class Record(models.Model):
+    gabi_acc_number = models.CharField(db_column='GABI_Acc_Number', primary_key=True, max_length=255)  # Field name made lowercase.
+    accession_number = models.CharField(max_length=255, blank=True)
+    reference = models.TextField(blank=True)
+    genus_name_pub = models.CharField(max_length=255, blank=True)
+    lat = models.CharField(max_length=255, blank=True, db_column='dec_lat')
+    lon = models.CharField(max_length=255, blank=True, db_column='dec_long')
+    taxon_code = models.ForeignKey('Species', db_column='valid_taxonomy', to_field='taxon_code', blank=True, null=True)
+    #bentity = models.ForeignKey(BentitiesHighres, db_column='bentity', blank=True, null=True)
+    
+    class Meta:
+        managed = False
+        db_table = 'record'
+
 

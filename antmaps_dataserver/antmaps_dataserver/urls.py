@@ -15,4 +15,7 @@ urlpatterns = [
     url(r'^subfamily-list', speciesmode.views.subfamily_list),
     url(r'^genus-list', speciesmode.views.genus_list),
     url(r'^species-list', speciesmode.views.species_list),
+    
+    # get points for a species to plot on map
+    url(r'^species-points', speciesmode.views.species_points),
 ]
