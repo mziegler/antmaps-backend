@@ -23,6 +23,10 @@ Note about git submodules
 -------------------------
 This git repository has a pointer to the antmaps frontend repository (antmaps-app), as the folder called "antmaps_frontend."  When you do a "git clone", use the "--recursive" option to automatically clone the submodules.  **When you do a "git pull", always also do a "git submodule update"** to update the front-end submodule.
 
+See http://git-scm.com/docs/git-submodule
+
+To set up the graphical Github interface to work with submodules, see http://stackoverflow.com/questions/12899163/where-is-git-submodule-update-in-sourcetree
+
 
 Setting up database connection
 ------------------------------
