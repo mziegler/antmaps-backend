@@ -22,3 +22,9 @@ export ANTMAPS_DB_HOST="127.0.0.1"
 export ANTMAPS_DB_PORT="5432"
 export ANTMAPS_DB_USER="antmaps"
 export ANTMAPS_DB_PASSWORD="password"
+
+
+# Run the extra config file if it exists
+if [ -f ../extra-config.sh ]; then
+	source ../extra-config.sh
+fi
