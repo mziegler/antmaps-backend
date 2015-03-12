@@ -1,3 +1,3 @@
 [submodule "static"]
-	path = static
+	path = antmaps_frontend
 	url = https://github.com/nitishnarula/antmaps-app.git
