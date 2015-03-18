@@ -18,4 +18,10 @@ urlpatterns = [
     
     # get points for a species to plot on map
     url(r'^species-points', speciesmode.views.species_points),
+    
+    # for genus and subfamily diversity modes
+    url(r'^species-per-bentity', speciesmode.views.species_per_bentity),
+    
+    # for bentity diversity mode
+    url(r'^species-in-common', speciesmode.views.species_in_common),
 ]

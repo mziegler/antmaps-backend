@@ -37,7 +37,7 @@ class Species(models.Model):
     class Meta:
         managed = False
         db_table = 'species'
-        
+
 
 class Record(models.Model):
     gabi_acc_number = models.CharField(db_column='GABI_Acc_Number', primary_key=True, max_length=255)  # Field name made lowercase.
@@ -46,11 +46,22 @@ class Record(models.Model):
     genus_name_pub = models.CharField(max_length=255, blank=True)
     lat = models.CharField(max_length=255, blank=True, db_column='dec_lat')
     lon = models.CharField(max_length=255, blank=True, db_column='dec_long')
-    taxon_code = models.ForeignKey('Species', db_column='valid_taxonomy', to_field='taxon_code', blank=True, null=True)
-    #bentity = models.ForeignKey(BentitiesHighres, db_column='bentity', blank=True, null=True)
+    taxon_code = models.ForeignKey('Species', db_column='valid_taxonomy', to_field='taxon_code', related_name='point', blank=True, null=True)
+    bentity = models.ForeignKey('Bentity', db_column='bentity', to_field='gid', related_name='point', blank=True, null=True)
     
     class Meta:
         managed = False
         db_table = 'record'
+
+
+class Bentity(models.Model):
+    gid = models.IntegerField(primary_key=True)
+    bentity = models.CharField(max_length=41, blank=True)
+    # geog = models.GeometryField(blank=True, srid=4326) # requires geodjango
+    
+    class Meta:
+        managed = False
+        db_table = 'bentities_highres'
+
 
 

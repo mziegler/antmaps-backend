@@ -6,7 +6,7 @@ import json
 
 from django.http import HttpResponse
 
-from speciesmode.models import Subfamily, Genus, Species, Record
+from speciesmode.models import Subfamily, Genus, Species, Record, Bentity
 
 
 
@@ -57,6 +57,7 @@ def genus_list(request):
     if request.GET.get('subfamily'):
         genera = genera.filter(subfamily_name=request.GET.get('subfamily'))
     
+    # serialize to JSON
     json_objects = [{'key': g, 'display':g} for g in genera]
     
     return JSONResponse({'genera': json_objects})
@@ -80,7 +81,8 @@ def species_list(request):
         species = ( Species.objects.all()
                     .filter(genus_name=request.GET.get('genus'))
                     .order_by('species_name') )
-                    
+        
+        # serialize to JSON            
         json_objects = [{
             'key': s.taxon_code, 
             'display': (s.genus_name_text + ' ' + s.species_name + ' ' + (s.subspecies_name or ''))
@@ -106,6 +108,7 @@ def species_points(request):
             .filter(taxon_code=request.GET.get('taxon_code'))
             .filter(lon__isnull=False) )
         
+        # serialize to JSON
         json_objects = [{
             'gabi_acc_number': r.gabi_acc_number,
             'lat': r.lat,
@@ -116,3 +119,77 @@ def species_points(request):
     
     else: # punt if the request doesn't have a taxon_code
         return JSONResponse({'records': [], 'message': "Please supply a 'taxon_code' in the URL query string."})
+        
+        
+
+def species_per_bentity(request):
+    """
+    Return a JSON response with a list of bentities, and the number of categorized
+    species in each bentity.  
+    
+    You must supply either a 'genus_name' or 'subfamily_name' in the URL query 
+    string to filter species.  (If you supply both, only 'genus_name' will be used.
+    
+    Outputted JSON is a list with {gid:xxx, species_count:xxx} for each bentity.
+    """
+    
+    bentities = []
+    
+    if request.GET.get('genus_name'): # use genus name
+        bentities = Bentity.objects.raw("""
+            SELECT "record"."bentity" as "gid", count(distinct "record"."valid_taxonomy") as "species_count"
+            FROM "record" 
+            INNER JOIN "species"
+            ON "record"."valid_taxonomy" = "species"."taxon_code"
+            where "species"."genus_name" = %s
+            group by "record"."bentity"     
+            """, [request.GET.get('genus_name')]) 
+        
+    elif request.GET.get('subfamily_name'): # use subfamily name
+        bentities = Bentity.objects.raw("""
+            SELECT "record"."bentity" as "gid", count(distinct "record"."valid_taxonomy") as "species_count"
+            FROM "record" 
+            INNER JOIN "species"
+            ON "record"."valid_taxonomy" = "species"."taxon_code"
+            INNER JOIN "genus"
+            ON "genus"."genus_name" = "species"."genus_name"
+            where "genus"."subfamily_name" = %s
+            group by "record"."bentity"  
+            """, [request.GET.get('subfamily_name')]) 
+    
+    else:
+        return JSONResponse({'records': [], 'message': "Please supply a 'genus_name' or 'subfamily_name' in the URL query string."})
+      
+    # serialize to JSON    
+    json_objects = [{'gid': b.gid, 'species_count': b.species_count} for b in bentities]
+    
+    return JSONResponse({'bentities': json_objects})
+    
+    
+    
+def species_in_common(request):
+    """
+    Given a 'bentity' in the URL query string, return a JSON response with a list
+    of bentities, and a count of how many species each other bentity has in common
+    with the given bentity.
+    
+    For each bentity, include {gid:xxx, species_count:xxx}
+    """
+    
+    if request.GET.get('bentity'):
+        bentities = Bentity.objects.raw("""
+            SELECT r2."bentity" AS "gid", count(distinct r2."valid_taxonomy") AS "species_count"
+            FROM "record" AS r1
+            INNER JOIN "record" AS r2
+            ON r1."valid_taxonomy" = r2."valid_taxonomy"
+            WHERE r1."bentity" = %s
+            GROUP BY r2."bentity";
+            """, [request.GET.get('bentity')])
+            
+        # serialize to JSON
+        json_objects = [{'gid': b.gid, 'species_count': b.species_count} for b in bentities]
+        
+        return JSONResponse({'bentities': json_objects})
+        
+    else:
+        return JSONResponse({'bentities':[], 'message': "Please supply a 'bentity' in the URL query string."})
