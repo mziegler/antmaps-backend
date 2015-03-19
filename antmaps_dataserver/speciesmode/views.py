@@ -83,9 +83,10 @@ def species_list(request):
                     .order_by('species_name') )
         
         # serialize to JSON            
+        # s.genus_name_id gets the actual text of the genus_name, instead of the related object
         json_objects = [{
             'key': s.taxon_code, 
-            'display': (s.genus_name_text + ' ' + s.species_name + ' ' + (s.subspecies_name or ''))
+            'display': (s.genus_name_id + ' ' + s.species_name + ' ' + (s.subspecies_name or '')) 
           } for s in species]
         
         return JSONResponse({'species': json_objects})

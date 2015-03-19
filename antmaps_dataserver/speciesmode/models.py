@@ -28,9 +28,8 @@ class Genus(models.Model):
 
 class Species(models.Model):
     species_id = models.IntegerField(primary_key=True)
-    taxon_code = models.CharField(unique=True, max_length=-1)
+    taxon_code = models.CharField(unique=True, max_length=99999)
     genus_name = models.ForeignKey(Genus, db_column='genus_name', to_field='genus_name', blank=True, null=True)
-    genus_name_text = models.TextField(blank=True, db_column='genus_name') # hack so Django can get the actual text of the genus_name without retrieving the related object
     species_name = models.TextField(blank=True)
     subspecies_name = models.TextField(blank=True)
     
