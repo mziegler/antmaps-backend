@@ -6,7 +6,7 @@ import json
 
 from django.http import HttpResponse
 
-from speciesmode.models import Subfamily, Genus, Species, Record, Bentity
+from queries.models import Subfamily, Genus, Species, Record, Bentity
 
 
 

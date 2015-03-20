@@ -41,15 +41,14 @@ ALLOWED_HOSTS = []
 # (if user accounts are ever implemented.)
 
 INSTALLED_APPS = (
-    'django.contrib.gis',
+    #'django.contrib.gis',
     #'django.contrib.admin',
     #'django.contrib.auth',
     #'django.contrib.contenttypes',
     #'django.contrib.sessions',
     #'django.contrib.messages',
     #'django.contrib.staticfiles',
-    #'bentities',
-    'speciesmode',
+    'queries',
 )
 
 
