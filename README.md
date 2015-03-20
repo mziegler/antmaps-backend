@@ -28,6 +28,15 @@ See http://git-scm.com/docs/git-submodule
 To set up the graphical Github interface to work with submodules, see http://stackoverflow.com/questions/12899163/where-is-git-submodule-update-in-sourcetree
 
 
+Database connection configuration
+---------------------------------
+The AntMaps backend loads database connection parameters from environment variables, which are set in "activate-environment.sh"
+
+Don't put sensitive passwords in activate-environment.sh, because it will be comitted to the git repository and published on GitHub (yikes!)
+
+The "activate-environment.sh" script will also try to run a script called "../extra-config.sh" (where ../ is the parent directory of the git repsitory.)  If you want to change the database connection parameters (eg. to connect straight to the GABI server with your own account,) the best way to do it is by creating ../extra-config.sh and exporting the environment variables in activate-environment.sh in ../extra-config.sh.  This will keep your sensitive passwords from being committed to the git repository and published on the internet.
+
+
 Setting up database connection
 ------------------------------
 The Antmaps backend needs to connect to a Postgres database.  Connection parameters are stored in /activate-environment.sh.

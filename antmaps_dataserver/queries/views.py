@@ -1,5 +1,6 @@
 """
-Right now, this module just has logic to populate the taxonomy select boxes.
+This module has all of the Django views that hit the database and process data
+for Ant Maps.
 """
 
 import json
