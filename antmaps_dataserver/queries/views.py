@@ -22,6 +22,7 @@ class JSONResponse(HttpResponse):
 
 
 
+
 def subfamily_list(request):
     """
     Return a JSON response with a sorted list of subfamilies.  For each subfamily,
@@ -36,6 +37,7 @@ def subfamily_list(request):
     json_objects = [{'key': s, 'display':s} for s in subfamilies]
     
     return JSONResponse({'subfamilies': json_objects})
+    
     
     
     
@@ -62,6 +64,7 @@ def genus_list(request):
     json_objects = [{'key': g, 'display':g} for g in genera]
     
     return JSONResponse({'genera': json_objects})
+    
     
     
     
@@ -95,7 +98,29 @@ def species_list(request):
     else:
         return JSONResponse({'species': [], 'message': "Please supply a 'genus' in the URL query string."})
             
-        
+       
+       
+
+def bentity_list(request):
+    """
+    Return a JSON response with a list of bentities for the diversity mode.
+    
+    For each subfamily, include a {key:xxx, display:xxx} with the names to 
+    use as a database key, and to display to the user.
+    """
+       
+       
+    bentities = Bentity.objects.all().order_by('bentity')
+    
+    json_objects = [{
+       'key': b.gid,
+       'display': b.bentity,
+    } for b in bentities]
+    
+    return JSONResponse({'bentities' : json_objects})
+    
+    
+    
     
 def species_points(request):
     """
@@ -121,6 +146,7 @@ def species_points(request):
     
     else: # punt if the request doesn't have a taxon_code
         return JSONResponse({'records': [], 'message': "Please supply a 'taxon_code' in the URL query string."})
+        
         
         
 
@@ -166,6 +192,7 @@ def species_per_bentity(request):
     json_objects = [{'gid': b.gid, 'species_count': b.species_count} for b in bentities]
     
     return JSONResponse({'bentities': json_objects})
+    
     
     
     
