@@ -45,8 +45,8 @@ class Record(models.Model):
     genus_name_pub = models.CharField(max_length=255, blank=True)
     lat = models.CharField(max_length=255, blank=True, db_column='dec_lat')
     lon = models.CharField(max_length=255, blank=True, db_column='dec_long')
-    taxon_code = models.ForeignKey('Species', db_column='valid_taxonomy', to_field='taxon_code', related_name='point', blank=True, null=True)
-    bentity = models.ForeignKey('Bentity', db_column='bentity', to_field='gid', related_name='point', blank=True, null=True)
+    taxon_code = models.ForeignKey('Species', db_column='valid_taxonomy', to_field='taxon_code', blank=True, null=True)
+    bentity = models.ForeignKey('Bentity', db_column='bentity', to_field='gid', blank=True, null=True)
     
     class Meta:
         managed = False

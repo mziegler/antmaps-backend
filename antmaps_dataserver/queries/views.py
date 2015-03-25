@@ -74,18 +74,44 @@ def species_list(request):
     include a {key:xxx, display:xxx} with the names to use as a database key, and
     to display to the user (the same for now.)
     
-    If there's a "genus" in the query string, return only species with a
-    genus_name matching the supplied genus.
+    If there's a "genus", "subfamily", "bentity", or "bentity2" in the query 
+    string, return only species matching these supplied parameters.  
+    
+    Bentity and bentity2 functionally both do the same thing, and are useful
+    for finding species that are present in both bentities.  If you just need one,
+    use "bentity" instead of "bentity2" for slightly better performance.
     
     For now, return an empty list if there's no genus supplied.  (Will probably
     want to change this behavior later.)
     """
     
+    
+    filtered = False
+    species = Species.objects.all().order_by('taxon_code').distinct()
+    
     if request.GET.get('genus'):
-        species = ( Species.objects.all()
-                    .filter(genus_name=request.GET.get('genus'))
-                    .order_by('species_name') )
+        filtered = True
+        species = species.filter(genus_name=request.GET.get('genus'))
         
+    if request.GET.get('subfamily'):
+        filtered = True
+        species = species.filter(genus_name__subfamily_name=request.GET.get('subfamily'))
+        
+    if request.GET.get('bentity'):
+        filtered = True
+        species = species.filter(record__bentity_id=request.GET.get('bentity'))
+    
+    # supply 'bentity2' to get species overlapping between 2 bentities    
+    if request.GET.get('bentity2'): 
+        filtered = True
+        species_in_bentity2 = species.filter(record__bentity_id=request.GET.get('bentity2')).distinct()
+        species = species.filter(pk__in=species_in_bentity2) # intersection
+        
+                     
+    
+    # return species list if it was filtered by something    
+    if filtered:
+    
         # serialize to JSON            
         # s.genus_name_id gets the actual text of the genus_name, instead of the related object
         json_objects = [{
@@ -95,8 +121,10 @@ def species_list(request):
         
         return JSONResponse({'species': json_objects})
     
-    else:
-        return JSONResponse({'species': [], 'message': "Please supply a 'genus' in the URL query string."})
+    
+    # error message if the user didn't supply an argument to filter the species list
+    else: 
+        return JSONResponse({'species': [], 'message': "Please supply a 'genus', 'subfamily', 'bentity', and/or 'bentity2' in the URL query string."})
             
        
        
@@ -222,3 +250,4 @@ def species_in_common(request):
         
     else:
         return JSONResponse({'bentities':[], 'message': "Please supply a 'bentity' in the URL query string."})
+        
