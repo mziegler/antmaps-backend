@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="">
+    <meta name="author" content="">
+  
+    <title>Ant Maps</title>
+
+    <link rel="icon" type="image/png" href="/img/spp.png">
+
+    <!-- Bootstrap Core CSS -->
+    <link href="/css/bootstrap.css" rel="stylesheet">
+    
+    <!-- Google Fonts Dosis -->
+    <link rel="stylesheet" href="http://fonts.googleapis.com/css?family=Dosis">
+    
+    <!-- Hover.css -->
+    <link rel="stylesheet" href="/css/hover-min.css">
+    
+    
+    <link rel="stylesheet" type="text/css" href="/css/report.css">
+    
+
+
+</head>
+<body>
+
+ <!-- Navigation -->
+    <nav class="navbar navbar-inverse navbar-fixed-top" role="navigation">
+            <!-- Brand and toggle get grouped for better mobile display -->
+            <div class="navbar-header">
+                <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#bs-example-navbar-collapse-1">
+                    <span class="sr-only">Toggle navigation</span>
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                </button>
+                <a class="navbar-brand" href="index.html">AntMaps</a>
+            </div>
+    </nav>
+    
+     <div class="container-fluid">
+      <section class="module content">
+            {% if form.is_valid %}
+                <div class="success">
+                    Your error report has been submitted.  Thanks for the feedback! <br /><br />
+                    <a href="javascript:window.close()">Close this window and return to Ant Maps</a>
+                </div>
+            {% else %}
+
+	          	<form id="ajax-contact" method="post">
+	          	    <h1>Report AntMaps Data Error</h1>
+	          	
+			        <div class="field">
+			            <label for="name">Your Name</label>
+			            {{ form.name.errors }}
+			            {{ form.name }}
+			        </div>
+			
+			        <div class="field">
+			            <label for="email">Email</label>
+			            {{ form.email.errors }}
+			            {{ form.email }}
+			        </div>
+			
+			        <div class="field">
+			            <label for="message">Message</label>
+			            <p>Please describe the problem, and provide us with as much detail as you can to help us identify the records in question (eg. citation, location, and/or accession number.)</p>
+			            {{ form.message.errors }}
+			            {{ form.message }}
+			        </div>
+			        
+			        <div class="field">
+                        <label for="humantest">Prove you're a human</label>
+                        <p><img src="/img/spp.png" style="display:inline-block;margin-right:10px;">What's in the blue circle?  (Hint: the correct answer has <b>3 letters</b>, starts with <b>A</b> and ends with <b>NT</b>.)</p>
+                        
+                        {{ form.humantest.errors }}
+                        {{ form.humantest }}
+                    </div>
+			
+			        <div class="field">
+			            <input class="button" id="button-submit" type="submit" value="Send"></input>
+			        </div>
+			    </form> 
+			 {% endif %}
+			 
+			 <div id="form-messages"></div>
+			 
+     </section> <!-- end module content -->
+     </div> <!-- end container -->
+    
+    
+    <!-- jQuery -->
+    <script src="/js/libraries/jquery.js"></script>
+
+    <!-- Bootstrap Core JavaScript -->
+    <script src="/js/libraries/bootstrap.min.js"></script>
+    
+	
+	{% if not submitted %}
+	    <script type="text/javascript">
+		    $(document).ready(function() {
+		        if (window.opener) {
+			        var reportData = window.opener.controls.errorReportData();
+			        $('#id_message').append('Current Antmaps view\n--------------------------------\n' + reportData + '\n\n');
+			    }
+		    });
+	    </script>
+	{% endif %}
+
+
+
+</body>
+</html>

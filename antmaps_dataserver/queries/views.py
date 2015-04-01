@@ -193,24 +193,24 @@ def species_per_bentity(request):
     
     if request.GET.get('genus_name'): # use genus name
         bentities = Bentity.objects.raw("""
-            SELECT "record"."bentity" as "gid", count(distinct "record"."valid_taxonomy") as "species_count"
+            SELECT "record"."bentity" AS "gid", count(distinct "record"."valid_taxonomy") AS "species_count"
             FROM "record" 
             INNER JOIN "species"
             ON "record"."valid_taxonomy" = "species"."taxon_code"
-            where "species"."genus_name" = %s
-            group by "record"."bentity"     
+            WHERE "species"."genus_name" = %s
+            GROUP BY "record"."bentity"     
             """, [request.GET.get('genus_name')]) 
         
     elif request.GET.get('subfamily_name'): # use subfamily name
         bentities = Bentity.objects.raw("""
-            SELECT "record"."bentity" as "gid", count(distinct "record"."valid_taxonomy") as "species_count"
+            SELECT "record"."bentity" AS "gid", count(distinct "record"."valid_taxonomy") AS "species_count"
             FROM "record" 
             INNER JOIN "species"
             ON "record"."valid_taxonomy" = "species"."taxon_code"
             INNER JOIN "genus"
             ON "genus"."genus_name" = "species"."genus_name"
-            where "genus"."subfamily_name" = %s
-            group by "record"."bentity"  
+            WHERE "genus"."subfamily_name" = %s
+            GROUP BY "record"."bentity"  
             """, [request.GET.get('subfamily_name')]) 
     
     else:

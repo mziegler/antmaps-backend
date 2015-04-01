@@ -7,6 +7,7 @@ from django.conf.urls import patterns, include, url
 
 #import bentities.views
 import queries.views
+import error_report.views
 
 urlpatterns = [
     # Examples:
@@ -29,4 +30,7 @@ urlpatterns = [
     
     # for bentity diversity mode
     url(r'^species-in-common', queries.views.species_in_common),
+    
+    # report data error
+    url(r'^error-report', error_report.views.report),
 ]
