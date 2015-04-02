@@ -48,7 +48,12 @@
       <section class="module content">
             {% if form.is_valid %}
                 <div class="success">
-                    Your error report has been submitted.  Thanks for the feedback! <br /><br />
+                    {% if errormessage %}
+                        {{ errormessage }}
+                    {% else%}
+                        Your error report has been submitted.  Thanks for the feedback! 
+                    {% endif %}
+                    <br /><br />
                     <a href="javascript:window.close()">Close this window and return to Ant Maps</a>
                 </div>
             {% else %}
@@ -107,7 +112,7 @@
 		    $(document).ready(function() {
 		        if (window.opener) {
 			        var reportData = window.opener.controls.errorReportData();
-			        $('#id_message').append('Current Antmaps view\n--------------------------------\n' + reportData + '\n\n');
+			        $('#id_message').append('Current Antmaps view\n--------\n' + reportData + '\n\n');
 			    }
 		    });
 	    </script>

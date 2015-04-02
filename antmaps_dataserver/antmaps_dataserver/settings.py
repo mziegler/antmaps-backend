@@ -27,8 +27,7 @@ BASE_DIR = os.path.dirname(os.path.dirname(__file__))
 SECRET_KEY = '4$+@f2c752oqe1fiivax_arjr9awpd(*t1)0&25c#3p!b3j#_n'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = os.environ.get('ANTMAPS_DEBUG')
-
+DEBUG = os.environ.get('ANTMAPS_DEBUG') or False
 
 TEMPLATE_DEBUG = True
 
@@ -120,3 +119,18 @@ STATIC_URL = '/'
 
 # serve /antmaps-app as static files (debug mode only)
 STATICFILES_DIRS = (os.path.join(BASE_DIR, '..', 'antmaps_frontend'),)
+
+
+
+
+# Email connection parameters, for data error report
+# Set from environment variables
+EMAIL_HOST = os.environ.get('ANTMAPS_EMAIL_HOST')
+EMAIL_PORT = os.environ.get('ANTMAPS_EMAIL_PORT')
+EMAIL_HOST_USER = os.environ.get('ANTMAPS_EMAIL_HOST_USER')
+EMAIL_HOST_PASSWORD = os.environ.get('ANTMAPS_EMAIL_HOST_PASSWORD')
+EMAIL_USE_TLS = os.environ.get('ANTMAPS_EMAIL_USE_TLS') or False
+EMAIL_USE_SSL = os.environ.get('ANTMAPS_EMAIL_USE_SSL') or False
+
+# Where to send error report emails
+REPORT_TO_EMAIL_ADDRESS = os.environ.get('ANTMAPS_REPORT_TO_EMAIL_ADDRESS')
