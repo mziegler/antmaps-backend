@@ -25,6 +25,9 @@ urlpatterns = [
     # get points for a species to plot on map
     url(r'^species-points', queries.views.species_points),
     
+    # for species mode categories
+    url(r'^species-bentity-categories', queries.views.species_bentities_categories),
+    
     # for genus and subfamily diversity modes
     url(r'^species-per-bentity', queries.views.species_per_bentity),
     
@@ -33,4 +36,6 @@ urlpatterns = [
     
     # report data error
     url(r'^error-report', error_report.views.report),
+    
+ 
 ]

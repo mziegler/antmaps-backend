@@ -7,7 +7,8 @@ import json
 
 from django.http import HttpResponse
 
-from queries.models import Subfamily, Genus, Species, Record, Bentity
+from queries.models import Subfamily, Genus, Species, Record, Bentity, SpeciesBentityPair
+
 
 
 
@@ -19,6 +20,8 @@ class JSONResponse(HttpResponse):
         content = json.dumps(data)
         kwargs['content_type'] = 'application/json'
         super(JSONResponse, self).__init__(content, **kwargs)
+
+
 
 
 
@@ -37,6 +40,8 @@ def subfamily_list(request):
     json_objects = [{'key': s, 'display':s} for s in subfamilies]
     
     return JSONResponse({'subfamilies': json_objects})
+    
+    
     
     
     
@@ -64,6 +69,8 @@ def genus_list(request):
     json_objects = [{'key': g, 'display':g} for g in genera]
     
     return JSONResponse({'genera': json_objects})
+    
+    
     
     
     
@@ -128,6 +135,8 @@ def species_list(request):
             
        
        
+       
+       
 
 def bentity_list(request):
     """
@@ -146,6 +155,8 @@ def bentity_list(request):
     } for b in bentities]
     
     return JSONResponse({'bentities' : json_objects})
+    
+    
     
     
     
@@ -177,6 +188,42 @@ def species_points(request):
         
         
         
+        
+        
+        
+def species_bentities_categories(request):
+    """
+    Given a 'taxon_code' in the URL query string, return a JSON response with a
+    list of bentities for which that species (taxon_code) has a record, along 
+    with the category code for each.
+    
+    Outputted JSON is a list with {gid:xxx, category:xxx} for each bentity where
+    the species has a record.
+    
+    If the bentity does not have any records for the specified species, there 
+    will not be an object for the bentity in the results.
+    """
+    
+    if request.GET.get('taxon_code'):
+        # look up category for this species for each bentity from the database
+        bentities = ( SpeciesBentityPair.objects
+                     .filter(valid_species_name=request.GET.get('taxon_code'))
+                     .only('bentity', 'category') )
+    
+    
+        # serialize to JSON    
+        json_objects = [{'gid': b.bentity_id, 'category': b.category} for b in bentities]
+        
+        return JSONResponse({'bentities': json_objects})
+    
+    
+    else: # punt if the request doesn't have a taxon_code
+        return JSONResponse({'records': [], 'message': "Please supply a 'taxon_code' in the URL query string."})
+    
+        
+        
+        
+        
 
 def species_per_bentity(request):
     """
@@ -187,6 +234,9 @@ def species_per_bentity(request):
     string to filter species.  (If you supply both, only 'genus_name' will be used.
     
     Outputted JSON is a list with {gid:xxx, species_count:xxx} for each bentity.
+    
+    If the bentity does not have any species matching the query, there will not
+    be an object for the bentity in the results.
     """
     
     bentities = []
@@ -218,6 +268,8 @@ def species_per_bentity(request):
     
     
     
+    
+    
 def species_in_common(request):
     """
     Given a 'bentity' in the URL query string, return a JSON response with a list
@@ -225,6 +277,9 @@ def species_in_common(request):
     with the given bentity.
     
     For each bentity, include {gid:xxx, species_count:xxx}
+    
+    If the bentity does not have any species matching the query, there will not
+    be an object for the bentity in the results.
     """
     
     if request.GET.get('bentity'):

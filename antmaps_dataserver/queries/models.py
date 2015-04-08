@@ -54,11 +54,12 @@ class Record(models.Model):
 
 
 class SpeciesBentityPair(models.Model):
-    # HACK: subfamily_name is not actually the primary key, Django just needs to think that there is a single-column primary key.  Don't use SpeciesBentityPair.objects.get() or anything else that needs to use the pk
-    subfamily_name = models.ForeignKey('Subfamily', primary_key=True, db_column='subfamily_name', to_field='subfamily_name', blank=True)
+    # GROSS HACK: the 'bentity' field is not actually the primary key, Django just needs to think that there is a single-column primary key.  Don't use SpeciesBentityPair.objects.get() or any other Django functions that rely on the PK
+    
+    subfamily_name = models.ForeignKey('Subfamily', db_column='subfamily_name', to_field='subfamily_name', blank=True)
     genus_name = models.ForeignKey(Genus, db_column='genus_name', to_field='genus_name', blank=True, null=True)
     valid_species_name = models.ForeignKey('Species', db_column='valid_species_name', to_field='taxon_code', blank=True, null=True)
-    bentity = models.ForeignKey('Bentity', db_column='bentity2_id', to_field='gid', blank=True, null=True)
+    bentity = models.ForeignKey('Bentity', primary_key=True, db_column='bentity2_id', to_field='gid', blank=True)
     category = models.CharField(max_length=2)
     
      
