@@ -83,11 +83,11 @@ DATABASES = {
         'ENGINE': 'django.contrib.gis.db.backends.postgis',
         
         # get connection parameters from environment variables
-        'NAME': os.environ['ANTMAPS_DB_NAME'],
-        'HOST': os.environ['ANTMAPS_DB_HOST'],
-        'PORT': os.environ['ANTMAPS_DB_PORT'],
-        'USER': os.environ['ANTMAPS_DB_USER'],
-        'PASSWORD': os.environ['ANTMAPS_DB_PASSWORD'],
+        'NAME': os.environ.get('ANTMAPS_DB_NAME'),
+        'HOST': os.environ.get('ANTMAPS_DB_HOST'),
+        'PORT': os.environ.get('ANTMAPS_DB_PORT'),
+        'USER': os.environ.get('ANTMAPS_DB_USER'),
+        'PASSWORD': os.environ.get('ANTMAPS_DB_PASSWORD'),
         
         # for postgres connection optimization
         'timezone': 'UTC',
