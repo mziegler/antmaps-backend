@@ -99,12 +99,12 @@ def species_list(request):
         
     if request.GET.get('bentity'):
         filtered = True
-        species = species.filter(record__bentity_id=request.GET.get('bentity'))
+        species = species.filter(speciesbentitypair__bentity=request.GET.get('bentity'))
     
     # supply 'bentity2' to get species overlapping between 2 bentities    
     if request.GET.get('bentity2'): 
         filtered = True
-        species_in_bentity2 = species.filter(record__bentity_id=request.GET.get('bentity2')).distinct()
+        species_in_bentity2 = species.filter(speciesbentitypair__bentity=request.GET.get('bentity2')).distinct()
         species = species.filter(pk__in=species_in_bentity2) # intersection
         
                      
@@ -116,7 +116,7 @@ def species_list(request):
         # s.genus_name_id gets the actual text of the genus_name, instead of the related object
         json_objects = [{
             'key': s.taxon_code, 
-            'display': (s.genus_name_id + ' ' + s.species_name + ' ' + (s.subspecies_name or '')) 
+            'display': (s.genus_name_id + ' ' + s.species_name) 
           } for s in species]
         
         return JSONResponse({'species': json_objects})
@@ -193,24 +193,18 @@ def species_per_bentity(request):
     
     if request.GET.get('genus_name'): # use genus name
         bentities = Bentity.objects.raw("""
-            SELECT "record"."bentity" AS "gid", count(distinct "record"."valid_taxonomy") AS "species_count"
-            FROM "record" 
-            INNER JOIN "species"
-            ON "record"."valid_taxonomy" = "species"."taxon_code"
-            WHERE "species"."genus_name" = %s
-            GROUP BY "record"."bentity"     
+            SELECT "bentity2_id" AS "bentity2_id", count(distinct "valid_species_name") AS "species_count"
+            FROM "map_species_bentity_pair"
+            WHERE "genus_name" = %s
+            GROUP BY "bentity2_id"     
             """, [request.GET.get('genus_name')]) 
         
     elif request.GET.get('subfamily_name'): # use subfamily name
         bentities = Bentity.objects.raw("""
-            SELECT "record"."bentity" AS "gid", count(distinct "record"."valid_taxonomy") AS "species_count"
-            FROM "record" 
-            INNER JOIN "species"
-            ON "record"."valid_taxonomy" = "species"."taxon_code"
-            INNER JOIN "genus"
-            ON "genus"."genus_name" = "species"."genus_name"
-            WHERE "genus"."subfamily_name" = %s
-            GROUP BY "record"."bentity"  
+            SELECT "bentity2_id" AS "bentity2_id", count(distinct "valid_species_name") AS "species_count"
+            FROM "map_species_bentity_pair"
+            WHERE "subfamily_name" = %s
+            GROUP BY "bentity2_id"  
             """, [request.GET.get('subfamily_name')]) 
     
     else:
@@ -235,12 +229,12 @@ def species_in_common(request):
     
     if request.GET.get('bentity'):
         bentities = Bentity.objects.raw("""
-            SELECT r2."bentity" AS "gid", count(distinct r2."valid_taxonomy") AS "species_count"
-            FROM "record" AS r1
-            INNER JOIN "record" AS r2
-            ON r1."valid_taxonomy" = r2."valid_taxonomy"
-            WHERE r1."bentity" = %s
-            GROUP BY r2."bentity";
+            SELECT r2."bentity2_id" AS "bentity2_id", count(distinct r2."valid_species_name") AS "species_count"
+            FROM "map_species_bentity_pair" AS r1
+            INNER JOIN "map_species_bentity_pair" AS r2
+            ON r1."valid_species_name" = r2."valid_species_name"
+            WHERE r1."bentity2_id" = %s
+            GROUP BY r2."bentity2_id";
             """, [request.GET.get('bentity')])
             
         # serialize to JSON
