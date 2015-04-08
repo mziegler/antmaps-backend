@@ -39,18 +39,18 @@ class Species(models.Model):
 
 # FIXME update to new view
 class Record(models.Model):
-    gabi_acc_number = models.CharField(db_column='GABI_Acc_Number', primary_key=True, max_length=255)  # Field name made lowercase.
+    gabi_acc_number = models.CharField(db_column='gabi_acc_number', primary_key=True, max_length=255)  # Field name made lowercase.
     #accession_number = models.CharField(max_length=255, blank=True)
     #reference = models.TextField(blank=True)
     #genus_name_pub = models.CharField(max_length=255, blank=True)
     lat = models.CharField(max_length=255, blank=True, db_column='dec_lat')
     lon = models.CharField(max_length=255, blank=True, db_column='dec_long')
-    taxon_code = models.ForeignKey('Species', db_column='valid_taxonomy', to_field='taxon_code', blank=True, null=True)
-    bentity = models.ForeignKey('Bentity', db_column='bentity', to_field='bentity2_id', blank=True, null=True)
+    valid_species_name = models.ForeignKey('Species', db_column='valid_species_name', to_field='taxon_code', blank=True, null=True)
+    #bentity = models.ForeignKey('Bentity', db_column='bentity2_id', to_field='bentity2_id', blank=True, null=True)
     
     class Meta:
         managed = False
-        db_table = 'record'
+        db_table = 'map_record'
 
 
 class SpeciesBentityPair(models.Model):

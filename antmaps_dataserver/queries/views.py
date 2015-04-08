@@ -171,8 +171,9 @@ def species_points(request):
     
     if request.GET.get('taxon_code'):
         records = ( Record.objects
-            .filter(taxon_code=request.GET.get('taxon_code'))
-            .filter(lon__isnull=False) )
+            .filter(valid_species_name=request.GET.get('taxon_code'))
+            .filter(lon__isnull=False)
+            .filter(lat__isnull=False) )
         
         # serialize to JSON
         json_objects = [{
