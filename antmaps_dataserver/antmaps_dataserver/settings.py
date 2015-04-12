@@ -31,7 +31,7 @@ DEBUG = os.environ.get('ANTMAPS_DEBUG') or False
 
 TEMPLATE_DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['.antmaps.unit.oist.jp','.antmaps.org','.localhost']
 
 
 # Application definition
