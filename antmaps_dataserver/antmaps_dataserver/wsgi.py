@@ -11,4 +11,13 @@ import os
 os.environ.setdefault("DJANGO_SETTINGS_MODULE", "antmaps_dataserver.settings")
 
 from django.core.wsgi import get_wsgi_application
-application = get_wsgi_application()
+_application = get_wsgi_application()
+
+def application(environ, start_response):
+    
+    # Pass Apache environment variables starting with ANTMAPS_ to django via os.environ
+    for key in environ:
+        if key.startswith('ANTMAPS_'):
+            os.environ[key] = environ[key]
+            
+    return _application(environ, start_response)
