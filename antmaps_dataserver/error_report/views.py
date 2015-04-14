@@ -39,6 +39,8 @@ class ErrorForm(forms.Form):
 def report(request):
     """
     Data error report page
+    
+    This view validates the form, and calls sendErrorReport if the form is valid
     """
     
     errormessage = ''  # error message to display to the user
@@ -53,10 +55,12 @@ def report(request):
                 sendErrorReport(form.cleaned_data)
                 
             except Exception as e:
-                if settings.DEBUG: # show error page in debug mode
+                if settings.DEBUG: # show default error page in debug mode
                     raise 
-                else:
-                    # if something went wrong trying to report the error, show an error message
+                    
+                else: # if we're not in debug mode, (if we're deployed on Apache)
+                
+                    # if something went wrong trying to report the error, show a friendly error message
                     errormessage = 'Something went wrong on the AntMaps server!  Your error report might not have been submitted.'
                     
                     # write the error to the Apache error log
@@ -64,17 +68,20 @@ def report(request):
                 
             
     else:
+        # show a blank error form if there's no POST
         submitted = False
         form = ErrorForm()
         
+        
     return render(request, 'error_report/report.html', {'form':form, 'submitted':submitted, 'errormessage': errormessage})
+            
             
             
             
 
 def sendErrorReport(cleaned_data):
     """
-    Send an email with the contents of the error report
+    Send an email with the contents of the error report form
     """
     
     message = """

@@ -5,7 +5,7 @@ URL Routing
 
 from django.conf.urls import patterns, include, url
 
-#import bentities.views
+
 import queries.views
 import error_report.views
 

@@ -27,5 +27,5 @@ urlpatterns = [
   # redirect empty URL to index.html
   url(r'^$', lambda request: redirect('/index.html')),
   
-] + staticfiles_urlpatterns()
+] + staticfiles_urlpatterns() # serve static files in debug mode
 

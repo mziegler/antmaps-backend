@@ -1,6 +1,8 @@
 """
-Subfamily, Genus, and Species models are currently just used for populating taxon
-select boxes.
+Database tables used by AntMaps.
+
+queries/views.py contains some raw-SQL queries, so if you change the database tables,
+you have to update the queries in views.py as well as updating this file.
 """
 
 from django.db import models
@@ -12,8 +14,10 @@ class Subfamily(models.Model):
     subfamily_name = models.TextField(primary_key=True)
 
     class Meta:
-        managed = False
+        managed = False # this means Django should never alter this table
         db_table = 'subfamily'
+
+
 
 
 class Genus(models.Model):
@@ -24,6 +28,8 @@ class Genus(models.Model):
     class Meta:
         managed = False
         db_table = 'genus'
+
+
 
 
 class Species(models.Model):
@@ -37,7 +43,8 @@ class Species(models.Model):
         db_table = 'species'
 
 
-# FIXME update to new view
+
+
 class Record(models.Model):
     gabi_acc_number = models.CharField(db_column='gabi_acc_number', primary_key=True, max_length=255)  # Field name made lowercase.
     #accession_number = models.CharField(max_length=255, blank=True)
@@ -53,6 +60,8 @@ class Record(models.Model):
         db_table = 'map_record'
 
 
+
+
 class SpeciesBentityPair(models.Model):
     # GROSS HACK: the 'bentity' field is not actually the primary key, Django just needs to think that there is a single-column primary key.  Don't use SpeciesBentityPair.objects.get() or any other Django functions that rely on the PK
     
@@ -61,11 +70,12 @@ class SpeciesBentityPair(models.Model):
     valid_species_name = models.ForeignKey('Species', db_column='valid_species_name', to_field='taxon_code', blank=True, null=True)
     bentity = models.ForeignKey('Bentity', primary_key=True, db_column='bentity2_id', to_field='gid', blank=True)
     category = models.CharField(max_length=2)
-    
      
     class Meta:
         managed = False
         db_table = 'map_species_bentity_pair'
+
+
 
 
 class Bentity(models.Model):
