@@ -231,10 +231,13 @@ def species_bentities_categories(request):
 def species_per_bentity(request):
     """
     Return a JSON response with a list of bentities, and the number of native
-    species in each bentity.  
+    species in each bentity.  Filter by "genus_name" or "subfamily_name" arguments
+    if present in the URL query string.  If both are presetnt, only "genus_name"
+    will be used.
     
-    You must supply either a 'genus_name' or 'subfamily_name' in the URL query 
-    string to filter species.  (If you supply both, only 'genus_name' will be used.
+    This view will query the "map_species_bentity_pair" view if "genus_name" or 
+    "subfamily_name" is supplied in the query string, and will query the 
+    "map_bentity_count" view if neither is supplied.
     
     Outputted JSON is a list with {gid:xxx, species_count:xxx} for each bentity.
     
@@ -253,6 +256,7 @@ def species_per_bentity(request):
             GROUP BY "bentity2_id"     
             """, [request.GET.get('genus_name')]) 
         
+        
     elif request.GET.get('subfamily_name'): # use subfamily name
         bentities = Bentity.objects.raw("""
             SELECT "bentity2_id" AS "bentity2_id", count(distinct "valid_species_name") AS "species_count"
@@ -262,8 +266,12 @@ def species_per_bentity(request):
             GROUP BY "bentity2_id"  
             """, [request.GET.get('subfamily_name')]) 
     
-    else:
-        return JSONResponse({'records': [], 'message': "Please supply a 'genus_name' or 'subfamily_name' in the URL query string."})
+    
+    else: # no filter supplied, return total species richness
+        bentities = Bentity.objects.raw("""
+            SELECT "bentity2_id", "count" AS "species_count" FROM "map_bentity_count";
+        """)
+        
       
     # serialize to JSON    
     json_objects = [{'gid': b.gid, 'species_count': b.species_count} for b in bentities]
