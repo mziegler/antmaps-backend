@@ -104,17 +104,19 @@ def species_list(request):
         filtered = True
         species = species.filter(genus_name__subfamily_name=request.GET.get('subfamily'))
         
+    # speciesbentitypair__status='N' for only native species
     if request.GET.get('bentity'):
         filtered = True
-        species = species.filter(speciesbentitypair__bentity=request.GET.get('bentity'))
+        species = species.filter(speciesbentitypair__bentity=request.GET.get('bentity'), speciesbentitypair__category='N')
     
-    # supply 'bentity2' to get species overlapping between 2 bentities    
+    # supply 'bentity2' to get species overlapping between 2 bentities
+    # speciesbentitypair__status='N' for only native species    
     if request.GET.get('bentity2'): 
         filtered = True
-        species_in_bentity2 = species.filter(speciesbentitypair__bentity=request.GET.get('bentity2')).distinct()
+        species_in_bentity2 = species.filter(speciesbentitypair__bentity=request.GET.get('bentity2'), speciesbentitypair__category='N').distinct()
         species = species.filter(pk__in=species_in_bentity2) # intersection
         
-                     
+
     
     # return species list if it was filtered by something    
     if filtered:
@@ -228,7 +230,7 @@ def species_bentities_categories(request):
 
 def species_per_bentity(request):
     """
-    Return a JSON response with a list of bentities, and the number of categorized
+    Return a JSON response with a list of bentities, and the number of native
     species in each bentity.  
     
     You must supply either a 'genus_name' or 'subfamily_name' in the URL query 
@@ -247,6 +249,7 @@ def species_per_bentity(request):
             SELECT "bentity2_id" AS "bentity2_id", count(distinct "valid_species_name") AS "species_count"
             FROM "map_species_bentity_pair"
             WHERE "genus_name" = %s
+            AND "category" = 'N'
             GROUP BY "bentity2_id"     
             """, [request.GET.get('genus_name')]) 
         
@@ -255,6 +258,7 @@ def species_per_bentity(request):
             SELECT "bentity2_id" AS "bentity2_id", count(distinct "valid_species_name") AS "species_count"
             FROM "map_species_bentity_pair"
             WHERE "subfamily_name" = %s
+            AND "category" = 'N'
             GROUP BY "bentity2_id"  
             """, [request.GET.get('subfamily_name')]) 
     
@@ -274,8 +278,8 @@ def species_per_bentity(request):
 def species_in_common(request):
     """
     Given a 'bentity' in the URL query string, return a JSON response with a list
-    of bentities, and a count of how many species each other bentity has in common
-    with the given bentity.
+    of bentities, and a count of how many native species each other bentity has 
+    in common with the given bentity.
     
     For each bentity, include {gid:xxx, species_count:xxx}
     
@@ -290,6 +294,7 @@ def species_in_common(request):
             INNER JOIN "map_species_bentity_pair" AS r2
             ON r1."valid_species_name" = r2."valid_species_name"
             WHERE r1."bentity2_id" = %s
+            AND r1."category" = 'N'
             GROUP BY r2."bentity2_id";
             """, [request.GET.get('bentity')])
             
