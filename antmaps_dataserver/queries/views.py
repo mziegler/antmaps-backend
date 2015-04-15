@@ -10,6 +10,7 @@ from django.db.models import Q
 
 from queries.models import Subfamily, Genus, Species, Record, Bentity, SpeciesBentityPair
 
+from re import split
 
 
 
@@ -147,8 +148,10 @@ def species_autocomplete(request):
         
         species = Species.objects.all().order_by('taxon_code')
         
+        # split tokens by period or white space
+        q_tokens = split(r'[.\s]+', q)
+        
         # prefix match for each token in the search string against genus name or species name
-        q_tokens = q.split()
         for token in q_tokens:
             species = species.filter(Q(species_name__istartswith=token) | Q(genus_name__genus_name__istartswith=token))
         
@@ -160,7 +163,7 @@ def species_autocomplete(request):
         
         
     else: # empty response if no search string 'q'
-        return JSONResponse({})
+        return JSONResponse({'species':[]})
 
 
 
