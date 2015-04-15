@@ -6,6 +6,7 @@ for Ant Maps.
 import json
 
 from django.http import HttpResponse
+from django.db.models import Q
 
 from queries.models import Subfamily, Genus, Species, Record, Bentity, SpeciesBentityPair
 
@@ -94,7 +95,7 @@ def species_list(request):
     
     
     filtered = False
-    species = Species.objects.all().order_by('taxon_code').distinct()
+    species = Species.objects.all().order_by('taxon_code')
     
     if request.GET.get('genus'):
         filtered = True
@@ -137,6 +138,32 @@ def species_list(request):
             
        
        
+
+
+
+def species_autocomplete(request):
+    if request.GET.get('q'):
+        q = request.GET.get('q')
+        
+        species = Species.objects.all().order_by('taxon_code')
+        
+        # prefix match for each token in the search string against genus name or species name
+        q_tokens = q.split()
+        for token in q_tokens:
+            species = species.filter(Q(species_name__istartswith=token) | Q(genus_name__genus_name__istartswith=token))
+        
+        print(species.query)
+        
+        JSON_objects = [{'label': (s.genus_name_id + ' ' + s.species_name), 'value': s.taxon_code} for s in species]
+        
+        return JSONResponse({'species': JSON_objects})
+        
+        
+    else: # empty response if no search string 'q'
+        return JSONResponse({})
+
+
+
        
        
 

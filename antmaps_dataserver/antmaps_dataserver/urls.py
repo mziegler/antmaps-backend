@@ -22,6 +22,9 @@ urlpatterns = [
     url(r'^species-list', queries.views.species_list),
     url(r'^bentity-list', queries.views.bentity_list),
     
+    # species autocomplete
+    url(r'^species-autocomplete', queries.views.species_autocomplete),
+    
     # get points for a species to plot on map
     url(r'^species-points', queries.views.species_points),
     
