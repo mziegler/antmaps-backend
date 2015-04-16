@@ -3,6 +3,7 @@ Django app for reporting data errors
 """
 
 
+from time import time
 
 from django.shortcuts import render
 from django import forms
@@ -98,7 +99,7 @@ Sender email: {email}
 """.format(**cleaned_data)
     
     send_mail(
-        subject='AntMaps data error report', 
+        subject='AntMaps data error report ' + str(int(time())), # add timestamp 
         message=message, 
         from_email=settings.EMAIL_HOST_USER, 
         recipient_list=[settings.REPORT_TO_EMAIL_ADDRESS])
