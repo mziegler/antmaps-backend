@@ -171,4 +171,4 @@ if not DEBUG:
             
         }
     }
-    CACHE_MIDDLEWARE_SECONDS = 60 * 60 * 2 # cache for 2 hours
+    CACHE_MIDDLEWARE_SECONDS = 60 * 60 * 4 # cache for 4 hours

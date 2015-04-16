@@ -8,7 +8,7 @@ from re import split
 
 from django.http import HttpResponse
 from django.db.models import Q
-from django.views.decorators.cache import cache_control
+from django.views.decorators.cache import never_cache
 
 from queries.models import Subfamily, Genus, Species, Record, Bentity, SpeciesBentityPair
 
@@ -143,8 +143,16 @@ def species_list(request):
        
 
 
-@cache_control(max_age=5*60)
+@never_cache
 def species_autocomplete(request):
+    """
+    Given a query 'q' in the URL query string, split q into tokens and return
+    a list of species for which the tokens in q are a prefix of the genus name
+    or species name.  (Used for species-search autocomplete.)
+    
+    For each species, return a {label: -species name-, value: -species_code-} object.
+    """
+    
     if request.GET.get('q'):
         q = request.GET.get('q')
         
