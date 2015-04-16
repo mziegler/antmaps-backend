@@ -8,6 +8,7 @@ from time import time
 from django.shortcuts import render
 from django import forms
 from django.core.mail import send_mail
+from django.views.decorators.cache import never_cache
 
 from django.conf import settings
 
@@ -37,6 +38,7 @@ class ErrorForm(forms.Form):
         
     
 
+@never_cache
 def report(request):
     """
     Data error report page

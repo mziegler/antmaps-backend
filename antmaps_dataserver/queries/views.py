@@ -4,13 +4,15 @@ for Ant Maps.
 """
 
 import json
+from re import split
 
 from django.http import HttpResponse
 from django.db.models import Q
+from django.views.decorators.cache import cache_control
 
 from queries.models import Subfamily, Genus, Species, Record, Bentity, SpeciesBentityPair
 
-from re import split
+
 
 
 
@@ -141,7 +143,7 @@ def species_list(request):
        
 
 
-
+@cache_control(max_age=5*60)
 def species_autocomplete(request):
     if request.GET.get('q'):
         q = request.GET.get('q')
@@ -154,8 +156,6 @@ def species_autocomplete(request):
         # prefix match for each token in the search string against genus name or species name
         for token in q_tokens:
             species = species.filter(Q(species_name__istartswith=token) | Q(genus_name__genus_name__istartswith=token))
-        
-        print(species.query)
         
         JSON_objects = [{'label': (s.genus_name_id + ' ' + s.species_name), 'value': s.taxon_code} for s in species]
         

@@ -53,6 +53,7 @@ INSTALLED_APPS = (
 
 
 MIDDLEWARE_CLASSES = (
+    'django.middleware.cache.UpdateCacheMiddleware', # must be first
     #'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     #'django.middleware.csrf.CsrfViewMiddleware', # security-related
@@ -60,7 +61,13 @@ MIDDLEWARE_CLASSES = (
     #'django.contrib.auth.middleware.SessionAuthenticationMiddleware',
     #'django.contrib.messages.middleware.MessageMiddleware',
     #'django.middleware.clickjacking.XFrameOptionsMiddleware', # security-related
+    'django.middleware.cache.FetchFromCacheMiddleware', # must be last
 )
+
+
+
+
+
 
 
 # If in debug mode, use a special URLconf that 1) serves static files, and 2)
@@ -73,6 +80,10 @@ else:
 
 
 WSGI_APPLICATION = 'antmaps_dataserver.wsgi.application'
+
+
+
+
 
 
 # Database
@@ -97,6 +108,12 @@ DATABASES = {
     }
 }
 
+
+
+
+
+
+
 # Internationalization
 # https://docs.djangoproject.com/en/1.7/topics/i18n/
 
@@ -111,6 +128,9 @@ USE_L10N = True
 USE_TZ = True
 
 
+
+
+
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/1.7/howto/static-files/
 
@@ -119,6 +139,7 @@ STATIC_URL = '/'
 
 # serve /antmaps-app as static files (debug mode only)
 STATICFILES_DIRS = (os.path.join(BASE_DIR, '..', 'antmaps_frontend'),)
+
 
 
 
@@ -134,3 +155,20 @@ EMAIL_USE_SSL = os.environ.get('ANTMAPS_EMAIL_USE_SSL') or False
 
 # Where to send error report emails
 REPORT_TO_EMAIL_ADDRESS = os.environ.get('ANTMAPS_REPORT_TO_EMAIL_ADDRESS')
+
+
+
+
+
+
+# use memcached if deployed (otherwise fall back to Django's default in-memory cache)
+if not DEBUG:
+    CACHES = {
+        'default': {
+            'BACKEND': 'django.core.cache.backends.memcached.MemcachedCache',
+            'LOCATION': '127.0.0.1:11211',
+            'KEY_PREFIX': 'antmaps',
+            
+        }
+    }
+    CACHE_MIDDLEWARE_SECONDS = 60 * 60 * 2 # cache for 2 hours
