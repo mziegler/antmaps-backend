@@ -165,7 +165,7 @@ REPORT_TO_EMAIL_ADDRESS = os.environ.get('ANTMAPS_REPORT_TO_EMAIL_ADDRESS')
 if not DEBUG:
     CACHES = {
         'default': {
-            'BACKEND': 'django.core.cache.backends.memcached.MemcachedCache',
+            'BACKEND': 'django.core.cache.backends.memcached.PyLibMCCache',
             'LOCATION': '127.0.0.1:11211',
             'KEY_PREFIX': 'antmaps',
             
