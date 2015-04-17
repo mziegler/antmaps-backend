@@ -341,6 +341,7 @@ def species_in_common(request):
             ON r1."valid_species_name" = r2."valid_species_name"
             WHERE r1."bentity2_id" = %s
             AND r1."category" = 'N'
+            AND r2."category" = 'N'
             GROUP BY r2."bentity2_id";
             """, [request.GET.get('bentity')])
             
