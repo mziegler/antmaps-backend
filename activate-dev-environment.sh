@@ -15,7 +15,7 @@
 
 
 
-echo "###IMPORTANT###  Make sure to run this script with the command \"source ./activate-environment.sh\""
+echo "###IMPORTANT###  Make sure to run this script with the command \"source ./activate-dev-environment.sh\""
 echo
 echo "Use the command \"deactivate\" to deactivate the environment"
 echo
@@ -58,6 +58,8 @@ export ANTMAPS_REPORT_TO_EMAIL_ADDRESS='foo@foo.foo'
 
 
 
+# Set this environment variable to use Memcached (unneccesary for development)
+# export ANTMAPS_USE_MEMCACHED='true'
 
 
 # Run the extra config file if it exists

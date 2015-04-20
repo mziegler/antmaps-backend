@@ -161,8 +161,9 @@ REPORT_TO_EMAIL_ADDRESS = os.environ.get('ANTMAPS_REPORT_TO_EMAIL_ADDRESS')
 
 
 
-# use memcached if deployed (otherwise fall back to Django's default in-memory cache)
-if not DEBUG:
+# use memcached if the ANTMAPS_USE_MEMCACHED environment variable is set
+# (otherwise fall back to Django's default in-memory cache)
+if os.environ.get('ANTMAPS_USE_MEMCACHED'):
     CACHES = {
         'default': {
             'BACKEND': 'django.core.cache.backends.memcached.PyLibMCCache',
