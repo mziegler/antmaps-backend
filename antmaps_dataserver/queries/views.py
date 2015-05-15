@@ -119,20 +119,23 @@ def species_list(request):
         filtered = True
         species_in_bentity2 = species.filter(speciesbentitypair__bentity=request.GET.get('bentity2'), speciesbentitypair__category='N').distinct()
         species = species.filter(pk__in=species_in_bentity2) # intersection
-        
+    #new
+    if request.GET.get('taxon_code'):
+    	filtered = True
+    	species = species.filter(taxon_code=request.GET.get('taxon_code'))
+    	
 
     
-    # return species list if it was filtered by something    
+    # return species list if it was filtered by something
+    # serialize to JSON            
+    # s.genus_name_id gets the actual text of the genus_name, instead of the related object
     if filtered:
-    
-        # serialize to JSON            
-        # s.genus_name_id gets the actual text of the genus_name, instead of the related object
-        json_objects = [{
-            'key': s.taxon_code, 
-            'display': (s.genus_name_id + ' ' + s.species_name) 
-          } for s in species]
-        
-        return JSONResponse({'species': json_objects})
+    	if request.GET.get('taxon_code'):
+    		json_objects = [{'key': s.taxon_code, 'speciesName': s.species_name, 'genusName': s.genus_name, 'subfamilyName': s.subfamily_name} for s in species]
+    	else:
+    		json_objects = [{'key': s.taxon_code, 'display': (s.genus_name_id + ' ' + s.species_name)} for s in species]
+
+    	return JSONResponse({'species': json_objects})
     
     
     # error message if the user didn't supply an argument to filter the species list
