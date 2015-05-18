@@ -10,7 +10,7 @@ from django.http import HttpResponse
 from django.db.models import Q
 from django.views.decorators.cache import never_cache
 
-from queries.models import Subfamily, Genus, Species, Record, Bentity, SpeciesBentityPair
+from queries.models import Subfamily, Genus, Species, Record, Bentity, SpeciesBentityPair, Taxonomy
 
 
 
@@ -119,31 +119,49 @@ def species_list(request):
         filtered = True
         species_in_bentity2 = species.filter(speciesbentitypair__bentity=request.GET.get('bentity2'), speciesbentitypair__category='N').distinct()
         species = species.filter(pk__in=species_in_bentity2) # intersection
-    #new
-    if request.GET.get('taxon_code'):
-    	filtered = True
-    	species = species.filter(taxon_code=request.GET.get('taxon_code'))
-    	
 
     
     # return species list if it was filtered by something
     # serialize to JSON            
     # s.genus_name_id gets the actual text of the genus_name, instead of the related object
     if filtered:
-    	if request.GET.get('taxon_code'):
-    		json_objects = [{'key': s.taxon_code, 'speciesName': s.species_name, 'genusName': s.genus_name, 'subfamilyName': s.subfamily_name} for s in species]
-    	else:
-    		json_objects = [{'key': s.taxon_code, 'display': (s.genus_name_id + ' ' + s.species_name)} for s in species]
-
+    	json_objects = [{'key': s.taxon_code, 'display': (s.genus_name_id + ' ' + s.species_name)} for s in species]
     	return JSONResponse({'species': json_objects})
-    
     
     # error message if the user didn't supply an argument to filter the species list
     else: 
         return JSONResponse({'species': [], 'message': "Please supply a 'genus', 'subfamily', 'bentity', and/or 'bentity2' in the URL query string."})
             
        
-       
+
+
+def antweb_links(request):
+	"""
+	
+	"""
+# 	taxonomy = Taxonomy.objects.all().order_by('taxon_code')
+# 	
+# 	if request.GET.get('taxon_code'):
+# 		taxonomy = taxonomy.filter(taxon_code=request.GET.get('taxon_code'))
+# 		json_objects = [{'key': t.taxon_code, 'speciesName': t.species_name, 'genusName': t.genus_name, 'subfamilyName': t.subfamily_name} for t in taxonomy]
+# 		return JSONResponse({'taxonomy': json_objects})
+# 	else:
+# 		return JSONResponse({'taxonomy': []})
+
+	taxonomy = []
+	if request.GET.get('taxon_code'):
+		taxonomy = Taxonomy.objects.raw("""
+		SELECT taxon_code, subfamily_name, genus_name, species_name
+		FROM map_taxonomy_list
+		WHERE taxon_code = %s
+		""", [request.GET.get('taxon_code')])
+		
+		# serialize to JSON
+		json_objects = [{'key': t.taxon_code, 'speciesName': t.species_name, 'genusName': t.genus_name, 'subfamilyName': t.subfamily_name} for t in taxonomy]
+		#json_objects = {'key': taxonomy.taxon_code, 'speciesName': taxonomy.species_name, 'genusName': taxonomy.genus_name, 'subfamilyName': taxonomy.subfamily_name}
+		return JSONResponse({'taxonomy': json_objects})
+	else:
+		return JSONResponse({'taxonomy': []})
 
 
 @never_cache
@@ -290,7 +308,11 @@ def species_per_bentity(request):
     
     if request.GET.get('genus_name'): # use genus name
         bentities = Bentity.objects.raw("""
-            SELECT "bentity2_id" AS "bentity2_id", count(distinct "valid_species_name") AS "species_count"
+            SELECT "bentity2_id" AS "bentity2_id", count(distinct "valid_species_name") AS "species_count",
+            		sum("literature_count"::int) AS "literature_count", 
+            		sum("museum_count"::int) AS "museum_count",
+            		sum("database_count"::int) AS "database_count",
+            		sum("num_records"::int) AS "num_records"
             FROM "map_species_bentity_pair"
             WHERE "genus_name" = %s
             AND "category" = 'N'
@@ -300,7 +322,11 @@ def species_per_bentity(request):
         
     elif request.GET.get('subfamily_name'): # use subfamily name
         bentities = Bentity.objects.raw("""
-            SELECT "bentity2_id" AS "bentity2_id", count(distinct "valid_species_name") AS "species_count"
+            SELECT "bentity2_id" AS "bentity2_id", count(distinct "valid_species_name") AS "species_count",
+            		sum("literature_count"::int) AS "literature_count", 
+            		sum("museum_count"::int) AS "museum_count",
+            		sum("database_count"::int) AS "database_count",
+            		sum("num_records"::int) AS "num_records"
             FROM "map_species_bentity_pair"
             WHERE "subfamily_name" = %s
             AND "category" = 'N'
@@ -310,12 +336,14 @@ def species_per_bentity(request):
     
     else: # no filter supplied, return total species richness
         bentities = Bentity.objects.raw("""
-            SELECT "bentity2_id", "count" AS "species_count" FROM "map_bentity_count";
+            SELECT "bentity2_id", "species_count", "literature_count"::int, "museum_count"::int, "database_count"::int, "num_records"::int 
+            FROM "map_bentity_count";
         """)
         
       
     # serialize to JSON    
-    json_objects = [{'gid': b.gid, 'species_count': b.species_count} for b in bentities]
+    json_objects = [{'gid': b.gid, 'species_count': b.species_count, 'num_records':b.num_records,
+    'literature_count':b.literature_count, 'museum_count': b.museum_count,'database_count':b.database_count} for b in bentities]
     
     return JSONResponse({'bentities': json_objects})
     

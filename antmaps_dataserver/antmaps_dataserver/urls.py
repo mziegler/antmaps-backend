@@ -37,6 +37,9 @@ urlpatterns = [
     # for bentity diversity mode
     url(r'^species-in-common', queries.views.species_in_common),
     
+    # for antweb and antwiki links
+    url(r'^antweb-links', queries.views.antweb_links),
+    
     # report data error
     url(r'^error-report', error_report.views.report),
     

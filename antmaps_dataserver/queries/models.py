@@ -35,14 +35,25 @@ class Genus(models.Model):
 class Species(models.Model):
     #species_id = models.IntegerField(primary_key=True)
     taxon_code = models.CharField(primary_key=True, max_length=99999)
-    genus_name = models.CharField(max_length=255)
-    #genus_name = models.ForeignKey(Genus, db_column='genus_name', to_field='genus_name', blank=True, null=True)
-    species_name = models.CharField(max_length=255)
-    subfamily_name = models.CharField(max_length=255)
+    genus_name = models.ForeignKey(Genus, db_column='genus_name', to_field='genus_name', blank=True, null=True)
+    species_name = models.TextField(blank=True)
     
     class Meta:
         managed = False
-        db_table = 'map_taxonomy_list'
+        db_table = 'species'
+        
+
+
+
+class Taxonomy(models.Model):
+	taxon_code = models.CharField(primary_key=True, max_length=99999)
+	subfamily_name = models.TextField(blank=True)
+	genus_name = models.TextField(blank=True)
+	species_name = models.TextField(blank=True)
+	
+	class Meta:
+		managed = False
+		db_table = 'map_taxonomy_list'
 
 
 
@@ -73,9 +84,9 @@ class SpeciesBentityPair(models.Model):
     bentity = models.ForeignKey('Bentity', primary_key=True, db_column='bentity2_id', to_field='gid', blank=True)
     category = models.CharField(max_length=2)
     num_records = models.IntegerField()
-    literature = models.IntegerField()
-    museum_specimen = models.IntegerField()
-    database_collection = models.IntegerField()
+    literature_count = models.IntegerField()
+    museum_count = models.IntegerField()
+    database_count = models.IntegerField()
      
     class Meta:
         managed = False
