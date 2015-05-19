@@ -307,7 +307,7 @@ def species_per_bentity(request):
     
     else: # no filter supplied, return total species richness
         bentities = Bentity.objects.raw("""
-            SELECT "bentity2_id", "count" AS "species_count" FROM "map_bentity_count";
+            SELECT "bentity2_id", "species_count" FROM "map_bentity_count";
         """)
         
       
