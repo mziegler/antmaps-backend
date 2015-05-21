@@ -332,19 +332,6 @@ def species_per_bentity(request):
             AND "category" = 'N'
             GROUP BY "bentity2_id"  
             """, [request.GET.get('subfamily_name')]) 
-            
-    # elif request.GET.get('bentity'):#filter by bentity
-#     	bentities = Bentity.objects.raw("""
-#             SELECT "bentity2_id" AS "bentity2_id", count(distinct "valid_species_name") AS "species_count",
-#             		sum("literature_count"::int) AS "literature_count", 
-#             		sum("museum_count"::int) AS "museum_count",
-#             		sum("database_count"::int) AS "database_count",
-#             		sum("num_records"::int) AS "num_records"
-#             FROM "map_species_bentity_pair"
-#             WHERE "genus_name" = %s
-#             AND "category" = 'N'
-#             GROUP BY "bentity2_id"     
-#             """, [request.GET.get('bentity')])
     
     else: # no filter supplied, return total species richness
         bentities = Bentity.objects.raw("""
@@ -378,7 +365,11 @@ def species_in_common(request):
     
     if request.GET.get('bentity'):
         bentities = Bentity.objects.raw("""
-            SELECT r2."bentity2_id" AS "bentity2_id", count(distinct r2."valid_species_name") AS "species_count"
+            SELECT r2."bentity2_id" AS "bentity2_id", count(distinct r2."valid_species_name") AS "species_count",
+            		sum(r2."literature_count"::int) AS "literature_count", 
+            		sum(r2."museum_count"::int) AS "museum_count",
+            		sum(r2."database_count"::int) AS "database_count",
+            		sum(r2."num_records"::int) AS "num_records" 
             FROM "map_species_bentity_pair" AS r1
             INNER JOIN "map_species_bentity_pair" AS r2
             ON r1."valid_species_name" = r2."valid_species_name"
@@ -389,7 +380,8 @@ def species_in_common(request):
             """, [request.GET.get('bentity')])
             
         # serialize to JSON
-        json_objects = [{'gid': b.gid, 'species_count': b.species_count} for b in bentities]
+        json_objects = [{'gid': b.gid, 'species_count': b.species_count,'num_records':b.num_records,
+    'literature_count':b.literature_count, 'museum_count': b.museum_count,'database_count':b.database_count} for b in bentities]
         
         return JSONResponse({'bentities': json_objects})
         
