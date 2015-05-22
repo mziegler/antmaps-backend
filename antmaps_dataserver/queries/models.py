@@ -41,6 +41,19 @@ class Species(models.Model):
     class Meta:
         managed = False
         db_table = 'species'
+        
+
+
+
+class Taxonomy(models.Model):
+	taxon_code = models.CharField(primary_key=True, max_length=99999)
+	subfamily_name = models.TextField(blank=True)
+	genus_name = models.TextField(blank=True)
+	species_name = models.TextField(blank=True)
+	
+	class Meta:
+		managed = False
+		db_table = 'map_taxonomy_list'
 
 
 
@@ -54,6 +67,8 @@ class Record(models.Model):
     lon = models.CharField(max_length=255, blank=True, db_column='dec_long')
     valid_species_name = models.ForeignKey('Species', db_column='valid_species_name', to_field='taxon_code', blank=True, null=True)
     #bentity = models.ForeignKey('Bentity', db_column='bentity2_id', to_field='bentity2_id', blank=True, null=True)
+    #new
+    status = models.CharField(max_length=255, blank=True, db_column='antmaps_category')
     
     class Meta:
         managed = False
@@ -70,6 +85,10 @@ class SpeciesBentityPair(models.Model):
     valid_species_name = models.ForeignKey('Species', db_column='valid_species_name', to_field='taxon_code', blank=True, null=True)
     bentity = models.ForeignKey('Bentity', primary_key=True, db_column='bentity2_id', to_field='gid', blank=True)
     category = models.CharField(max_length=2)
+    num_records = models.IntegerField()
+    literature_count = models.IntegerField()
+    museum_count = models.IntegerField()
+    database_count = models.IntegerField()
      
     class Meta:
         managed = False
