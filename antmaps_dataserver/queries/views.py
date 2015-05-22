@@ -137,16 +137,14 @@ def species_list(request):
 
 def antweb_links(request):
 	"""
+	Given a taxon code in the URL query string, returns a JSON response with the species,
+	genus and subfamily.
 	
+	Outputted JSON is a list with {key:xxx, speciesName: xxx, genusName: xxx, 
+	subfamilyName: xxx}/
+		
 	"""
-# 	taxonomy = Taxonomy.objects.all().order_by('taxon_code')
-# 	
-# 	if request.GET.get('taxon_code'):
-# 		taxonomy = taxonomy.filter(taxon_code=request.GET.get('taxon_code'))
-# 		json_objects = [{'key': t.taxon_code, 'speciesName': t.species_name, 'genusName': t.genus_name, 'subfamilyName': t.subfamily_name} for t in taxonomy]
-# 		return JSONResponse({'taxonomy': json_objects})
-# 	else:
-# 		return JSONResponse({'taxonomy': []})
+
 
 	taxonomy = []
 	if request.GET.get('taxon_code'):
@@ -158,7 +156,7 @@ def antweb_links(request):
 		
 		# serialize to JSON
 		json_objects = [{'key': t.taxon_code, 'speciesName': t.species_name, 'genusName': t.genus_name, 'subfamilyName': t.subfamily_name} for t in taxonomy]
-		#json_objects = {'key': taxonomy.taxon_code, 'speciesName': taxonomy.species_name, 'genusName': taxonomy.genus_name, 'subfamilyName': taxonomy.subfamily_name}
+		
 		return JSONResponse({'taxonomy': json_objects})
 	else:
 		return JSONResponse({'taxonomy': []})
@@ -241,6 +239,7 @@ def species_points(request):
             'gabi_acc_number': r.gabi_acc_number,
             'lat': r.lat,
             'lon': r.lon,
+            'status':r.status
         } for r in records]
         
         return JSONResponse({'records': json_objects})
@@ -289,8 +288,10 @@ def species_bentities_categories(request):
 
 def species_per_bentity(request):
     """
-    Return a JSON response with a list of bentities, and the number of native
-    species in each bentity.  Filter by "genus_name" or "subfamily_name" arguments
+    Return a JSON response with a list of bentities, the number of native
+    species in each bentity, the number of records found in each bentity, 
+    and out of the total records what number are museum records, database records,
+    and literature records.  Filter by "genus_name" or "subfamily_name" arguments
     if present in the URL query string.  If both are presetnt, only "genus_name"
     will be used.
     
@@ -298,7 +299,8 @@ def species_per_bentity(request):
     "subfamily_name" is supplied in the query string, and will query the 
     "map_bentity_count" view if neither is supplied.
     
-    Outputted JSON is a list with {gid:xxx, species_count:xxx} for each bentity.
+    Outputted JSON is a list with {gid:xxx, species_count:xxx, num_records:xxx, 
+    literature_count:xxx, museum_count:xxx, database_count:xxx} for each bentity.
     
     If the bentity does not have any species matching the query, there will not
     be an object for the bentity in the results.
@@ -354,10 +356,13 @@ def species_per_bentity(request):
 def species_in_common(request):
     """
     Given a 'bentity' in the URL query string, return a JSON response with a list
-    of bentities, and a count of how many native species each other bentity has 
-    in common with the given bentity.
+    of bentities, a count of how many native species each other bentity has 
+    in common with the given bentity, the number of records that are found in other 
+    bentities that share species with the selected bentity, and out of the total records 
+    what number are museum records, database records, and literature records.
     
-    For each bentity, include {gid:xxx, species_count:xxx}
+    For each bentity, include {gid:xxx, species_count:xxx, num_records:xxx, 
+    literature_count:xxx, museum_count:xxx, database_count:xxx}
     
     If the bentity does not have any species matching the query, there will not
     be an object for the bentity in the results.
