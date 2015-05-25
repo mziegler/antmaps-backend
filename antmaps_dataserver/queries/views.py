@@ -269,11 +269,12 @@ def species_bentities_categories(request):
         # look up category for this species for each bentity from the database
         bentities = ( SpeciesBentityPair.objects
                      .filter(valid_species_name=request.GET.get('taxon_code'))
-                     .only('bentity', 'category') )
+                     .only('bentity', 'category','num_records','literature_count','museum_count','database_count') )
     
     
         # serialize to JSON    
-        json_objects = [{'gid': b.bentity_id, 'category': b.category} for b in bentities]
+        json_objects = [{'gid': b.bentity_id, 'category': b.category, 'num_records':b.num_records, 'literature_count':b.literature_count, 
+        'museum_count':b.museum_count, 'database_count':b.database_count} for b in bentities]
         
         return JSONResponse({'bentities': json_objects})
     
