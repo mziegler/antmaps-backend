@@ -1,5 +1,5 @@
 """
-Django app for reporting data errors
+Django app for reporting data issues
 """
 
 
@@ -15,7 +15,7 @@ from django.conf import settings
 
 class ErrorForm(forms.Form):
     """
-    Form for report-data-error page
+    Form for report-data-issue page
     """
 
     name = forms.CharField()
@@ -41,7 +41,7 @@ class ErrorForm(forms.Form):
 @never_cache
 def report(request):
     """
-    Data error report page
+    Data issue report page
     
     This view validates the form, and calls sendErrorReport if the form is valid
     """
@@ -84,11 +84,11 @@ def report(request):
 
 def sendErrorReport(cleaned_data):
     """
-    Send an email with the contents of the error report form
+    Send an email with the contents of the issue report form
     """
     
     message = """
-ANTMAPS DATA ERROR REPORT
+ANTMAPS DATA ISSUE REPORT
 -------------------------
 
 Sender name:  {name}
@@ -101,7 +101,7 @@ Sender email: {email}
 """.format(**cleaned_data)
     
     send_mail(
-        subject='AntMaps data error report ' + str(int(time())), # add timestamp 
+        subject='AntMaps data issue report ' + str(int(time())), # add timestamp 
         message=message, 
         from_email=settings.EMAIL_HOST_USER, 
         recipient_list=[settings.REPORT_TO_EMAIL_ADDRESS])
