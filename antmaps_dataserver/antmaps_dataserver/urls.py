@@ -28,6 +28,9 @@ urlpatterns = [
     # get points for a species to plot on map
     url(r'^species-points', queries.views.species_points),
     
+    #get metadata for a species for a bentity
+    url(r'^species-metadata',queries.views.species_metadata),
+    
     # for species mode categories
     url(r'^species-bentity-categories', queries.views.species_bentities_categories),
     
