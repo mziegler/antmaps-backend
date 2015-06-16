@@ -64,7 +64,7 @@ def report(request):
                 else: # if we're not in debug mode, (if we're deployed on Apache)
                 
                     # if something went wrong trying to report the error, show a friendly error message
-                    errormessage = 'Something went wrong on the AntMaps server!  Your error report might not have been submitted.'
+                    errormessage = 'Something went wrong on the AntMaps server!  Your report might not have been submitted.'
                     
                     # write the error to the Apache error log
                     import logging; logging.error(str(e))
