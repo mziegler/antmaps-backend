@@ -10,7 +10,7 @@ from django.http import HttpResponse
 from django.db.models import Q
 from django.views.decorators.cache import never_cache
 
-from queries.models import Subfamily, Genus, Species, Record, Bentity, SpeciesBentityPair, Taxonomy
+from queries.models import Subfamily, Genus, Species, Record, Bentity, SpeciesBentityPair, Taxonomy, SpeciesPoints
 
 
 
@@ -223,13 +223,13 @@ def bentity_list(request):
 def species_points(request):
     """
     Return a JSON response with a list of geo points for a species.  For each record,
-    include a {gabi_acc_number:xxx, lat:xxx, lon:xxx} object.
+    include a {gabi_acc_number:xxx, lat:xxx, lon:xxx, status:x} object.
     
     A "taxon_code" must be provided in the URL query string, to specify the species.
     """
     
     if request.GET.get('taxon_code'):
-        records = ( Record.objects
+        records = ( SpeciesPoints.objects
             .filter(valid_species_name=request.GET.get('taxon_code'))
             .filter(lon__isnull=False)
             .filter(lat__isnull=False) )
