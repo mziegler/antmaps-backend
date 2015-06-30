@@ -76,6 +76,20 @@ class Record(models.Model):
         db_table = 'map_record'
 
 
+class SpeciesPoints(models.Model):
+    #Reduced and unique set of lat/long points for species-bentity pair from the materialized view map_species_points.
+    gabi_acc_number = models.CharField(db_column='gabi_acc_number', primary_key=True, max_length=255)  # Field name made lowercase.
+    lat = models.CharField(max_length=255, blank=True, db_column='dec_lat')
+    lon = models.CharField(max_length=255, blank=True, db_column='dec_long')
+    valid_species_name = models.ForeignKey('Species', db_column='valid_species_name', to_field='taxon_code', blank=True, null=True)
+    #bentity = models.ForeignKey('Bentity', db_column='bentity2_id', to_field='bentity2_id', blank=True, null=True)
+    status = models.CharField(max_length=255, blank=True, db_column='antmaps_category') #for point colors
+    #type_of_data = models.CharField(max_length=255, blank=True, db_column='type_of_data')
+    #short_citation = models.CharField(max_length=255, blank=True, db_column='short_citation')
+    
+    class Meta:
+        managed = False
+        db_table = 'map_species_points'
 
 
 class SpeciesBentityPair(models.Model):
