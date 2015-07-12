@@ -168,7 +168,7 @@ def antweb_links(request):
 		""", [request.GET.get('genus_name')])
 		
 		# serialize to JSON
-		json_objects = [{'genusName': t.genus_name, 'subfamilyName': t.subfamily_name} for t in taxonomy}]
+		json_objects = [{'genusName': t.genus_name, 'subfamilyName': t.subfamily_name} for t in taxonomy]
 		
 		return JSONResponse({'taxonomy': json_objects})
 	
