@@ -158,6 +158,20 @@ def antweb_links(request):
 		json_objects = [{'key': t.taxon_code, 'speciesName': t.species_name, 'genusName': t.genus_name, 'subfamilyName': t.subfamily_name} for t in taxonomy]
 		
 		return JSONResponse({'taxonomy': json_objects})
+		
+	elif request.GET.get('genus_name'):
+		taxonomy = Taxonomy.objects.raw("""
+		SELECT genus_name, subfamily_name
+		FROM map_taxonomy_list
+		WHERE genus_name = %s
+		GROUP BY genus_name, subfamily_name
+		""", [request.GET.get('genus_name')])
+		
+		# serialize to JSON
+		json_objects = [{'genusName': t.genus_name, 'subfamilyName': t.subfamily_name} for t in taxonomy}]
+		
+		return JSONResponse({'taxonomy': json_objects})
+	
 	else:
 		return JSONResponse({'taxonomy': []})
 
