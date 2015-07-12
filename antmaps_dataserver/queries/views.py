@@ -138,10 +138,11 @@ def species_list(request):
 def antweb_links(request):
 	"""
 	Given a taxon code in the URL query string, returns a JSON response with the species,
-	genus and subfamily.
-	
-	Outputted JSON is a list with {key:xxx, speciesName: xxx, genusName: xxx, 
-	subfamilyName: xxx}/
+	genus and subfamily. Outputted JSON is a list with {key:xxx, speciesName: xxx, genusName: xxx, 
+	subfamilyName: xxx}
+    
+    Given a genus name in the URL query string, returns a JSON response with the genus and
+    subfamily. Outputted JSON is a list with {key:xxx, subfamily:xxx}
 		
 	"""
 
@@ -168,7 +169,7 @@ def antweb_links(request):
 		""", [request.GET.get('genus_name')])
 		
 		# serialize to JSON
-		json_objects = [{'genusName': t.genus_name, 'subfamilyName': t.subfamily_name} for t in taxonomy]
+		json_objects = [{'key': t.genus_name, 'subfamilyName': t.subfamily_name} for t in taxonomy]
 		
 		return JSONResponse({'taxonomy': json_objects})
 	
