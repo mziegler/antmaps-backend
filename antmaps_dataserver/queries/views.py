@@ -162,10 +162,10 @@ def antweb_links(request):
 		
 	elif request.GET.get('genus_name'):
 		taxonomy = Taxonomy.objects.raw("""
-		SELECT genus_name, subfamily_name
+		SELECT genus_name, subfamily_name,taxon_code
 		FROM map_taxonomy_list
 		WHERE genus_name = %s
-		GROUP BY genus_name, subfamily_name
+		GROUP BY genus_name, subfamily_name,taxon_code
 		""", [request.GET.get('genus_name')])
 		
 		# serialize to JSON
