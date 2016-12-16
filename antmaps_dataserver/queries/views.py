@@ -272,7 +272,7 @@ def species_metadata(request):
 	records=[]
 	if request.GET.get('taxon_code'):
 		records = Record.objects.raw("""
-			SELECT "gabi_acc_number", "type_of_data", "short_citation"
+			SELECT "gabi_acc_number", "type_of_data", "citation"
 			FROM "map_record"
 			WHERE "valid_species_name" = %s
 			AND "bentity2_id" = %s
@@ -282,7 +282,7 @@ def species_metadata(request):
 		
 		
 	# serialize to JSON    
-	json_objects = [{'gabi_acc_number': r.gabi_acc_number, 'type_of_data': r.type_of_data, 'short_citation':r.short_citation} for r in records]
+	json_objects = [{'gabi_acc_number': r.gabi_acc_number, 'type_of_data': r.type_of_data, 'citation':r.citation} for r in records]
 	
 	return JSONResponse({'records': json_objects})
         
