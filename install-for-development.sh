@@ -11,7 +11,7 @@ echo
 
 if [ ! -d ENV ]; then
   echo "Setting up virtual environment"
-  virtualenv -p python3 ENV           # set up virtual environment with python3
+  virtualenv -p python3 --system-site-packages ENV      # set up virtual environment with python3
 else
   echo "Virtual environment ENV already exists"
 fi 

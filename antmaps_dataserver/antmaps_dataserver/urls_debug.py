@@ -9,7 +9,7 @@ In production, we should do both of these things using Apache (or other web serv
 """
 
 
-from django.conf.urls import patterns, include, url
+from django.conf.urls import include, url
 
 # serve static files during development
 from django.contrib.staticfiles.urls import staticfiles_urlpatterns
