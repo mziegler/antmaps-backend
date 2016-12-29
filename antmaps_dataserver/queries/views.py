@@ -31,12 +31,12 @@ class JSONResponse(HttpResponse):
 class CSVResponse(HttpResponse):
     """
     An HttpResponse that renders its contents as a CSV.
+    
+    'rows' should be a list of dict objects, with each entry corresponding to 1 CSV field.
+    'fields' is the ordered list of field names in the CSV.
     """
     def __init__(self, rows, fields, **kwargs):
-        
-        field_keys = [f[0] for f in fields]
-        header_field_names = [f[1] for f in fields]
-        
+               
         csvfile = StringIO()
         
         # Write header with field names
@@ -72,8 +72,10 @@ def subfamily_list(request, format='json'):
                         
     
     if format == 'csv':
-        csv_rows = [{'subfamily':s} for s in subfamilies]
-        return CSVResponse(csv_rows, (('subfamily','subfamily'),))
+        return CSVResponse(
+            [{'subfamily':s} for s in subfamilies], 
+            fields=('subfamily',)  )
+        
     else:
         json_objects = [{'key': s, 'display':s} for s in subfamilies]
         return JSONResponse({'subfamilies': json_objects})
@@ -105,8 +107,10 @@ def genus_list(request, format='json'):
     
     
     if format == 'csv':
-        csv_rows = [{'genus': g} for g in genera]
-        return CSVResponse(csv_rows, (('genus','genus'),))
+        return CSVResponse(
+            [{'genus': g} for g in genera], 
+            fields=('genus',)   )
+            
     else:
         # serialize to JSON
         json_objects = [{'key': g, 'display':g} for g in genera]
@@ -175,8 +179,9 @@ def species_list(request, format='json'):
         
         if format == 'csv':
             # serialize to CSV
-            csv_rows = [{'species': s.taxon_code} for s in species]
-            return CSVResponse(csv_rows, (('species','species'),))
+            return CSVResponse( 
+                [{'species': s.taxon_code} for s in species], 
+                fields=('species',)    )
             
         
         else:
@@ -269,8 +274,10 @@ def species_autocomplete(request, format='json'):
             
     if format == 'csv':
         # serialize results as CSV
-        CSV_rows = [{'species': s.taxon_code} for s in species]
-        return CSVResponse(CSV_rows, (('species','species'),))
+        CSV_rows =
+        return CSVResponse(
+             [{'species': s.taxon_code} for s in species], 
+             fields=('species',)  )
         
                 
     else:
