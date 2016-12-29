@@ -21,8 +21,10 @@ urlpatterns = [
   # url(r'^blog/', include('blog.urls')),
   # url(r'^admin/', include(admin.site.urls)),
   
-  # route URLS prefixed by dataserver/ to main URL conf
+  # Route URLS prefixed by dataserver/ to main URL conf
+  # (Let's deprecate /dataserver in favor of /api. )
   url(r'^dataserver/', include('antmaps_dataserver.urls')),
+  url(r'^api/v01/', include('antmaps_dataserver.urls')),
   
   # redirect empty URL to index.html
   url(r'^$', lambda request: redirect('/index.html')),
