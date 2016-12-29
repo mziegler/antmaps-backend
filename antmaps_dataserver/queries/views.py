@@ -3,10 +3,12 @@ This module has all of the Django views that hit the database and process data
 for Ant Maps.
 """
 
+import csv
 import json
 from re import split
+from io import StringIO
 
-from django.http import HttpResponse
+from django.http import HttpResponse, StreamingHttpResponse
 from django.db.models import Q
 from django.views.decorators.cache import never_cache
 
@@ -26,11 +28,37 @@ class JSONResponse(HttpResponse):
         super(JSONResponse, self).__init__(content, **kwargs)
 
 
+class CSVResponse(HttpResponse):
+    """
+    An HttpResponse that renders its contents as a CSV.
+    """
+    def __init__(self, rows, fields, **kwargs):
+        
+        field_keys = [f[0] for f in fields]
+        header_field_names = [f[1] for f in fields]
+        
+        csvfile = StringIO()
+        
+        # Write header with field names
+        headerwriter = csv.writer(csvfile)    
+        headerwriter.writerow(fields)
+                                      
+        # Write CSV rows
+        writer = csv.DictWriter(csvfile, fields, extrasaction='ignore')
+        for row in rows:
+            writer.writerow(row)
+            
+            
+        kwargs['content_type'] = 'text/csv'
+        super(CSVResponse, self).__init__(csvfile.getvalue(), **kwargs)
+        self['Content-Disposition'] = 'attachment'
 
 
 
 
-def subfamily_list(request):
+
+
+def subfamily_list(request, format='json'):
     """
     Return a JSON response with a sorted list of subfamilies.  For each subfamily,
     include a {key:xxx, display:xxx} with the names to use as a database key, and
@@ -40,17 +68,22 @@ def subfamily_list(request):
     subfamilies = ( Subfamily.objects.all()
                     .order_by('subfamily_name')
                     .values_list('subfamily_name', flat=True) )
+                    
+                        
     
-    json_objects = [{'key': s, 'display':s} for s in subfamilies]
+    if format == 'csv':
+        csv_rows = [{'subfamily':s} for s in subfamilies]
+        return CSVResponse(csv_rows, (('subfamily','subfamily'),))
+    else:
+        json_objects = [{'key': s, 'display':s} for s in subfamilies]
+        return JSONResponse({'subfamilies': json_objects})
     
-    return JSONResponse({'subfamilies': json_objects})
     
     
     
     
     
-    
-def genus_list(request):
+def genus_list(request, format='json'):
     """
     Return a JSON response with a sorted list of genera.  For each genus,
     include a {key:xxx, display:xxx} with the names to use as a database key, and
@@ -69,17 +102,24 @@ def genus_list(request):
     if request.GET.get('subfamily'):
         genera = genera.filter(subfamily_name=request.GET.get('subfamily'))
     
-    # serialize to JSON
-    json_objects = [{'key': g, 'display':g} for g in genera]
-    
-    return JSONResponse({'genera': json_objects})
     
     
+    if format == 'csv':
+        csv_rows = [{'genus': g} for g in genera]
+        return CSVResponse(csv_rows, (('genus','genus'),))
+    else:
+        # serialize to JSON
+        json_objects = [{'key': g, 'display':g} for g in genera]
+        return JSONResponse({'genera': json_objects})
     
     
     
     
-def species_list(request):
+    
+    
+    
+    
+def species_list(request, format='json'):
     """
     Return a JSON response with a sorted list of species.  For each species,
     include a {key:xxx, display:xxx} with the names to use as a database key, and
@@ -120,22 +160,38 @@ def species_list(request):
         species_in_bentity2 = species.filter(speciesbentitypair__bentity=request.GET.get('bentity2'), speciesbentitypair__category='N').distinct()
         species = species.filter(pk__in=species_in_bentity2) # intersection
 
-    
-    # return species list if it was filtered by something
-    # serialize to JSON            
-    # s.genus_name_id gets the actual text of the genus_name, instead of the related object
-    if filtered:
-    	json_objects = [{'key': s.taxon_code, 'display': (s.genus_name_id + ' ' + s.species_name)} for s in species]
-    	return JSONResponse({'species': json_objects})
+
+    	
     
     # error message if the user didn't supply an argument to filter the species list
-    else: 
+    if not filtered: 
         return JSONResponse({'species': [], 'message': "Please supply a 'genus', 'subfamily', 'bentity', and/or 'bentity2' in the URL query string."})
-            
+         
+    
+    # return species list if it was filtered by something
+    # s.genus_name_id gets the actual text of the genus_name, instead of the related object     
+    else:
        
+        
+        if format == 'csv':
+            # serialize to CSV
+            csv_rows = [{'species': s.taxon_code} for s in species]
+            return CSVResponse(csv_rows, (('species','species'),))
+            
+        
+        else:
+            # serialize to JSON
+            json_objects = [{'key': s.taxon_code, 'display': (s.genus_name_id + ' ' + s.species_name)} for s in species]
+            return JSONResponse({'species': json_objects})
 
 
-def antweb_links(request):
+
+
+
+
+
+# currently doesn't do anything with the format (not public API)
+def antweb_links(request, format='json'):
 	"""
 	Given a taxon code in the URL query string, returns a JSON response with the species,
 	genus and subfamily. Outputted JSON is a list with {key:xxx, speciesName: xxx, genusName: xxx, 
@@ -177,8 +233,10 @@ def antweb_links(request):
 		return JSONResponse({'taxonomy': []})
 
 
+
+
 @never_cache
-def species_autocomplete(request):
+def species_autocomplete(request, format='json'):
     """
     Given a query 'q' in the URL query string, split q into tokens and return
     a list of species for which the tokens in q are a prefix of the genus name
@@ -199,20 +257,35 @@ def species_autocomplete(request):
         for token in q_tokens:
             species = species.filter(Q(species_name__istartswith=token) | Q(genus_name__genus_name__istartswith=token))
         
-        JSON_objects = [{'label': (s.genus_name_id + ' ' + s.species_name), 'value': s.taxon_code} for s in species]
+    
+    
+    
+    # empty species list if no query provided by the user
+    else:
+        species = []
+    
+
         
+            
+    if format == 'csv':
+        # serialize results as CSV
+        CSV_rows = [{'species': s.taxon_code} for s in species]
+        return CSVResponse(CSV_rows, (('species','species'),))
+        
+                
+    else:
+        # serialize results as JSON
+        JSON_objects = [{'label': (s.genus_name_id + ' ' + s.species_name), 'value': s.taxon_code} for s in species]
         return JSONResponse({'species': JSON_objects})
         
         
-    else: # empty response if no search string 'q'
-        return JSONResponse({'species':[]})
 
 
 
        
        
 
-def bentity_list(request):
+def bentity_list(request, format='json'):
     """
     Return a JSON response with a list of bentities for the diversity mode.
     
@@ -223,19 +296,28 @@ def bentity_list(request):
        
     bentities = Bentity.objects.all().order_by('bentity')
     
-    json_objects = [{
-       'key': b.gid,
-       'display': b.bentity,
-    } for b in bentities]
     
-    return JSONResponse({'bentities' : json_objects})
+    if format == 'csv':
+        # Serislize CSV for API
+        return CSVResponse(
+            [{'bentity_id': b.gid, 'bentity_name': b.bentity} for b in bentities],
+            ('bentity_id', 'bentity_name')   )
+    
+    else:
+        # Serialize JSON for bentity-list widget
+        json_objects = [{
+           'key': b.gid,
+           'display': b.bentity,
+        } for b in bentities]
+    
+        return JSONResponse({'bentities' : json_objects})
     
     
     
     
     
     
-def species_points(request):
+def species_points(request, format='json'):
     """
     Return a JSON response with a list of geo points for a species.  For each record,
     include a {gabi_acc_number:xxx, lat:xxx, lon:xxx, status:x} object.
@@ -265,8 +347,9 @@ def species_points(request):
         
         
 
-def species_metadata(request):
+def species_metadata(request, format='json'):
 	"""
+    Return citations?
 	"""
 	
 	records=[]
@@ -288,7 +371,7 @@ def species_metadata(request):
         
         
         
-def species_bentities_categories(request):
+def species_bentities_categories(request, format='json'):
     """
     Given a 'taxon_code' in the URL query string, return a JSON response with a
     list of bentities for which that species (taxon_code) has a record, along 
@@ -323,7 +406,7 @@ def species_bentities_categories(request):
         
         
 
-def species_per_bentity(request):
+def species_per_bentity(request, format='json'):
     """
     Return a JSON response with a list of bentities, the number of native
     species in each bentity, the number of records found in each bentity, 
@@ -390,7 +473,7 @@ def species_per_bentity(request):
     
     
     
-def species_in_common(request):
+def species_in_common(request, format='json'):
     """
     Given a 'bentity' in the URL query string, return a JSON response with a list
     of bentities, a count of how many native species each other bentity has 
