@@ -102,7 +102,7 @@ def genus_list(request, format='json'):
                 
     # if the user supplied a subfamily, get genuses with that subfamily
     if request.GET.get('subfamily'):
-        genera = genera.filter(subfamily_name=request.GET.get('subfamily'))
+        genera = genera.filter(subfamily_name=request.GET.get('subfamily').capitalize())
     
     
     
@@ -146,11 +146,11 @@ def species_list(request, format='json'):
     
     if request.GET.get('genus'):
         filtered = True
-        species = species.filter(genus_name=request.GET.get('genus'))
+        species = species.filter(genus_name=request.GET.get('genus').capitalize())
         
     if request.GET.get('subfamily'):
         filtered = True
-        species = species.filter(genus_name__subfamily_name=request.GET.get('subfamily'))
+        species = species.filter(genus_name__subfamily_name=request.GET.get('subfamily').capitalize())
         
     # speciesbentitypair__status='N' for only native species
     if request.GET.get('bentity'):
@@ -274,7 +274,6 @@ def species_autocomplete(request, format='json'):
             
     if format == 'csv':
         # serialize results as CSV
-        CSV_rows =
         return CSVResponse(
              [{'species': s.taxon_code} for s in species], 
              fields=('species',)  )
@@ -338,18 +337,28 @@ def species_points(request, format='json'):
             .filter(lon__isnull=False)
             .filter(lat__isnull=False) )
         
+        
         # serialize to JSON
-        json_objects = [{
+        export_objects = [{
             'gabi_acc_number': r.gabi_acc_number,
             'lat': r.lat,
             'lon': r.lon,
             'status':r.status
         } for r in records]
         
-        return JSONResponse({'records': json_objects})
+        
+        if format == 'csv':
+            return CSVRepsonse(
+                export_objects,
+                fields=('gabi_acc_number', 'lat', 'lon', 'status') )
+        
+        else:        
+            return JSONResponse({'records': export_objects})
     
     else: # punt if the request doesn't have a taxon_code
         return JSONResponse({'records': [], 'message': "Please supply a 'taxon_code' in the URL query string."})
+        
+        
         
         
         
@@ -378,9 +387,11 @@ def species_metadata(request, format='json'):
         
         
         
-def species_bentities_categories(request, format='json'):
+        
+        
+def species_range(request, format='json'):
     """
-    Given a 'taxon_code' in the URL query string, return a JSON response with a
+    Given a 'species' in the URL query string, return a JSON or CSV response with a
     list of bentities for which that species (taxon_code) has a record, along 
     with the category code for each.
     
@@ -389,25 +400,49 @@ def species_bentities_categories(request, format='json'):
     
     If the bentity does not have any records for the specified species, there 
     will not be an object for the bentity in the results.
+    
+    TODO: change taxon_code to species
     """
     
-    if request.GET.get('taxon_code'):
-        # look up category for this species for each bentity from the database
+    # TODO: deprecate this
+    # 'species' is the official new API, taxon_code is used by the old front-end code
+    species = request.GET.get('species') or request.GET.get('taxon_code')
+    
+    if species:
+        # look up category for this species for each bentity from the database        
         bentities = ( SpeciesBentityPair.objects
                      .filter(valid_species_name=request.GET.get('taxon_code'))
                      .only('bentity', 'category','num_records','literature_count','museum_count','database_count') )
     
+   
+    else: # punt if the request doesn't have a species
+       return JSONResponse({'records': [], 'message': "Please supply a 'species' argument in the URL query string."})
     
+    
+    if format == 'csv':
+        # return CSV
+        return CSVResponse(
+            [{
+                'species': species,
+                'bentity_id': b.bentity_id,
+                'bentity_name': b.bentity.bentity,
+                'status': b.category,
+                'num_records': b.num_records,
+                'literature_count': b.literature_count,
+                'museum_count': b.museum_count,
+                'database_count': b.database_count,
+                 
+            } for b in bentities],
+            fields=('species', 'bentity_id', 'bentity_name', 'status', 'num_records', 'literature_count', 'museum_count', 'database_count')  )
+    
+    else:
         # serialize to JSON    
         json_objects = [{'gid': b.bentity_id, 'category': b.category, 'num_records':b.num_records, 'literature_count':b.literature_count, 
         'museum_count':b.museum_count, 'database_count':b.database_count} for b in bentities]
         
         return JSONResponse({'bentities': json_objects})
     
-    
-    else: # punt if the request doesn't have a taxon_code
-        return JSONResponse({'records': [], 'message': "Please supply a 'taxon_code' in the URL query string."})
-    
+   
         
         
         
@@ -468,12 +503,30 @@ def species_per_bentity(request, format='json'):
             FROM "map_bentity_count";
         """)
         
-      
-    # serialize to JSON    
-    json_objects = [{'gid': b.gid, 'species_count': b.species_count, 'num_records':b.num_records,
-    'literature_count':b.literature_count, 'museum_count': b.museum_count,'database_count':b.database_count} for b in bentities]
     
-    return JSONResponse({'bentities': json_objects})
+    
+    import pdb; pdb.set_trace()
+    
+    
+    if format == 'csv':
+        return CSVResponse(
+            [{
+                'bentity_id': b.gid,
+                'bentity_name': b.bentity,
+                'species_count': b.species_count,
+                'num_records': b.num_records,
+                'literature_count': b.literature_count, 
+                'museum_count': b.museum_count,
+                'database_count': b.database_count
+            } for b in benities],
+            fields=('bentity_id', 'bentity_name', 'species_count', 'num_records', 'literature_count', 'museum_count', 'database_count')   )
+    
+    
+    else:  
+        # serialize to JSON    
+        json_objects = [{'gid': b.gid, 'species_count': b.species_count, 'num_records':b.num_records,
+        'literature_count':b.literature_count, 'museum_count': b.museum_count,'database_count':b.database_count} for b in bentities]
+        return JSONResponse({'bentities': json_objects})
     
     
     
@@ -495,7 +548,10 @@ def species_in_common(request, format='json'):
     be an object for the bentity in the results.
     """
     
-    if request.GET.get('bentity'):
+    # 'bentity_id' is the public API, 'bentity' is to be deprecated
+    query_bentity_id = request.GET.get('bentity_id') or request.GET.get('bentity')
+    
+    if query_bentity_id:
         bentities = Bentity.objects.raw("""
             SELECT r2."bentity2_id" AS "bentity2_id", count(distinct r2."valid_species_name") AS "species_count",
             		sum(r2."literature_count"::int) AS "literature_count", 
@@ -509,14 +565,34 @@ def species_in_common(request, format='json'):
             AND r1."category" = 'N'
             AND r2."category" = 'N'
             GROUP BY r2."bentity2_id";
-            """, [request.GET.get('bentity')])
-            
+            """, [query_bentity_id])
+    
+    
+    else:
+        return JSONResponse({'bentities':[], 'message': "Please supply a 'bentity_id' in the URL query string."})
+      
+      
+      
+      
+    if format == 'csv':
+        return CSVResponse(
+            [{
+                'query_bentity_id': query_bentity_id,
+                'bentity_id': b.gid,
+                'bentity_name': b.bentity,
+                'species_in_common': b.species_count,
+                'num_records':b.num_records,
+                'literature_count':b.literature_count, 
+                'museum_count': b.museum_count,
+                'database_count':b.database_count,
+            } for b in bentities],
+            fields=()   )
+        
+    else:  
         # serialize to JSON
         json_objects = [{'gid': b.gid, 'species_count': b.species_count,'num_records':b.num_records,
     'literature_count':b.literature_count, 'museum_count': b.museum_count,'database_count':b.database_count} for b in bentities]
-        
         return JSONResponse({'bentities': json_objects})
         
-    else:
-        return JSONResponse({'bentities':[], 'message': "Please supply a 'bentity' in the URL query string."})
+        
         
