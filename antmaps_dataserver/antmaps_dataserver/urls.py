@@ -39,10 +39,11 @@ urlpatterns = [
     
     
     # species autocomplete
-    url(r'^species-autocomplete'+f, queries.views.species_autocomplete),
+    url(r'^species-autocomplete'+f, queries.views.species_autocomplete), # deprecating
+    url(r'^species-search'+f, queries.views.species_autocomplete),
     
     # get points for a species to plot on map
-    url(r'^species-points'+f, queries.views.species_points),
+    url(r'^species-points'+f, queries.views.species_points), 
     
     #get metadata for a species for a bentity
     url(r'^species-metadata'+f,queries.views.species_metadata),

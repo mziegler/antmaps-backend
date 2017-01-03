@@ -153,15 +153,17 @@ def species_list(request, format='json'):
         species = species.filter(genus_name__subfamily_name=request.GET.get('subfamily').capitalize())
         
     # speciesbentitypair__status='N' for only native species
-    if request.GET.get('bentity'):
+    bentity = request.GET.get('bentity_id') or request.GET.get('bentity') # deprecating "bentity"
+    if bentity:
         filtered = True
-        species = species.filter(speciesbentitypair__bentity=request.GET.get('bentity'), speciesbentitypair__category='N')
+        species = species.filter(speciesbentitypair__bentity=bentity, speciesbentitypair__category='N')
     
     # supply 'bentity2' to get species overlapping between 2 bentities
     # speciesbentitypair__status='N' for only native species    
+    bentity2 = request.GET.get('bentity2_id') or request.GET.get('bentity2') # deprecating "bentity2"
     if request.GET.get('bentity2'): 
         filtered = True
-        species_in_bentity2 = species.filter(speciesbentitypair__bentity=request.GET.get('bentity2'), speciesbentitypair__category='N').distinct()
+        species_in_bentity2 = species.filter(speciesbentitypair__bentity=bentity2, speciesbentitypair__category='N').distinct()
         species = species.filter(pk__in=species_in_bentity2) # intersection
 
 
@@ -331,9 +333,11 @@ def species_points(request, format='json'):
     A "taxon_code" must be provided in the URL query string, to specify the species.
     """
     
-    if request.GET.get('taxon_code'):
+    
+    species = request.GET.get('species') or request.GET.get('taxon_code')
+    if species:
         records = ( SpeciesPoints.objects
-            .filter(valid_species_name=request.GET.get('taxon_code'))
+            .filter(valid_species_name=species)
             .filter(lon__isnull=False)
             .filter(lat__isnull=False) )
         
@@ -348,7 +352,7 @@ def species_points(request, format='json'):
         
         
         if format == 'csv':
-            return CSVRepsonse(
+            return CSVResponse(
                 export_objects,
                 fields=('gabi_acc_number', 'lat', 'lon', 'status') )
         
@@ -411,7 +415,7 @@ def species_range(request, format='json'):
     if species:
         # look up category for this species for each bentity from the database        
         bentities = ( SpeciesBentityPair.objects
-                     .filter(valid_species_name=request.GET.get('taxon_code'))
+                     .filter(valid_species_name=species.capitalize())
                      .only('bentity', 'category','num_records','literature_count','museum_count','database_count') )
     
    
@@ -470,7 +474,11 @@ def species_per_bentity(request, format='json'):
     
     bentities = []
     
-    if request.GET.get('genus_name'): # use genus name
+    #TODO: deprecate genus_name and subfamily_name
+    genus = request.GET.get('genus') or request.GET.get('genus_name')
+    subfamily = request.GET.get('subfamily') or request.GET.get('subfamily_name')
+    
+    if genus: # use genus name
         bentities = Bentity.objects.raw("""
             SELECT "bentity2_id" AS "bentity2_id", count(distinct "valid_species_name") AS "species_count",
             		sum("literature_count"::int) AS "literature_count", 
@@ -481,10 +489,10 @@ def species_per_bentity(request, format='json'):
             WHERE "genus_name" = %s
             AND "category" = 'N'
             GROUP BY "bentity2_id"     
-            """, [request.GET.get('genus_name')]) 
+            """, [genus.capitalize()]) 
         
         
-    elif request.GET.get('subfamily_name'): # use subfamily name
+    elif subfamily: # use subfamily name
         bentities = Bentity.objects.raw("""
             SELECT "bentity2_id" AS "bentity2_id", count(distinct "valid_species_name") AS "species_count",
             		sum("literature_count"::int) AS "literature_count", 
@@ -495,7 +503,7 @@ def species_per_bentity(request, format='json'):
             WHERE "subfamily_name" = %s
             AND "category" = 'N'
             GROUP BY "bentity2_id"  
-            """, [request.GET.get('subfamily_name')]) 
+            """, [subfamily.capitalize()]) 
     
     else: # no filter supplied, return total species richness
         bentities = Bentity.objects.raw("""
@@ -504,8 +512,6 @@ def species_per_bentity(request, format='json'):
         """)
         
     
-    
-    import pdb; pdb.set_trace()
     
     
     if format == 'csv':
@@ -518,7 +524,7 @@ def species_per_bentity(request, format='json'):
                 'literature_count': b.literature_count, 
                 'museum_count': b.museum_count,
                 'database_count': b.database_count
-            } for b in benities],
+            } for b in bentities],
             fields=('bentity_id', 'bentity_name', 'species_count', 'num_records', 'literature_count', 'museum_count', 'database_count')   )
     
     
@@ -586,7 +592,7 @@ def species_in_common(request, format='json'):
                 'museum_count': b.museum_count,
                 'database_count':b.database_count,
             } for b in bentities],
-            fields=()   )
+            fields=('query_bentity_id', 'bentity_id', 'bentity_name', 'species_in_common', 'num_records', 'literature_count', 'museum_count', 'database_count')   )
         
     else:  
         # serialize to JSON
