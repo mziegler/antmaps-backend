@@ -141,7 +141,7 @@ def species_list(request, format='json'):
     """
     
     
-    filtered = False
+    filtered = False # make sure we're filtering by something
     species = Species.objects.all().order_by('taxon_code')
     
     if request.GET.get('genus'):
@@ -360,7 +360,7 @@ def species_points(request, format='json'):
             return JSONResponse({'records': export_objects})
     
     else: # punt if the request doesn't have a taxon_code
-        return JSONResponse({'records': [], 'message': "Please supply a 'taxon_code' in the URL query string."})
+        return JSONResponse({'records': [], 'message': "Please supply a 'species' in the URL query string."})
         
         
         
@@ -370,6 +370,8 @@ def species_points(request, format='json'):
 def species_metadata(request, format='json'):
 	"""
     Return citations?
+    
+    Deprecating this in favor of citation_records
 	"""
 	
 	records=[]
@@ -391,6 +393,81 @@ def species_metadata(request, format='json'):
         
         
         
+        
+        
+def citations(request, format='json'):
+    """
+    Citations -- each record from this resource represents one 
+    species-location-citation combination.
+    
+    Since we have so many records in the map_record table, there's a danger here
+    of clobbering our server (and clobbering the user) with too many records at
+    once.  Therefore, to keep the results sets small, there are 3 ways the user
+    can query the resource:
+    
+    1) gabi_acc_number
+    2) species AND bentity
+    3) lat AND lon
+    """
+    
+    filtered = False # make sure we're filtering by something
+    records = Record.objects.all() #.order_by('gabi_acc_number')
+    
+    
+    # accession number
+    if request.GET.get('gabi_acc_number'):
+        filtered = True
+        records = records.filter(gabi_acc_number=request.GET.get('gabi_acc_number').upper())
+    
+    # species AND bentity
+    if request.GET.get('species') and request.GET.get('bentity_id'):
+        filtered = True
+        records = records.filter(valid_species_name_id=request.GET.get('species').capitalize())
+        records = records.filter(bentity_id=request.GET.get('bentity_id').upper())
+    
+    # lat and lon
+    if request.GET.get('lat') and request.GET.get('lon'):
+        filtered = True
+        records = records.filter(lat=request.GET.get('lat'), lon=request.GET.get('lon'))
+    
+    
+    # status
+    if request.GET.get('status'):
+        records = records.filter(status=request.GET.get('status')[0].upper())
+        
+        
+    # error message if the user didn't supply an argument to filter the records
+    if not filtered: 
+        return JSONResponse({'records': [], 'message': "Please supply a 'gabi_acc_number', 'species', 'genus', 'subfamily', 'bentity', 'lat', and/or 'lon' in the URL query string."})
+         
+    
+    # fetch all the bentitites at once, so we don't have to hit the database once for each record
+    records = records.prefetch_related('bentity') 
+        
+    output_objects = [{
+            'gabi_acc_number': r.gabi_acc_number,
+            'species': r.valid_species_name_id,
+            'bentity_id': r.bentity_id,
+            'bentity_name': r.bentity.bentity,
+            'status': r.status,
+            'type_of_data': r.type_of_data,
+            'lat': r.lat,
+            'lon': r.lon,  
+            'citation': r.citation,
+        } for r in records]
+    
+    
+    
+    if format == 'csv':
+        return CSVResponse(output_objects, ('gabi_acc_number', 'species', 'bentity_id', 'bentity_name', 'lat', 'lon', 'status', 'type_of_data', 'citation'))
+    
+    else:
+        return JSONResponse({'records': output_objects})
+    
+    
+    
+    
+    
         
         
 def species_range(request, format='json'):

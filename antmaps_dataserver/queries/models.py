@@ -66,7 +66,8 @@ class Record(models.Model):
     lat = models.CharField(max_length=255, blank=True, db_column='dec_lat')
     lon = models.CharField(max_length=255, blank=True, db_column='dec_long')
     valid_species_name = models.ForeignKey('Species', db_column='valid_species_name', to_field='taxon_code', blank=True, null=True)
-    #bentity = models.ForeignKey('Bentity', db_column='bentity2_id', to_field='bentity2_id', blank=True, null=True)
+    bentity = models.ForeignKey('Bentity', db_column='bentity2_id', blank=True, null=True)
+    #bentity_id = models.CharField(max_length=255, blank=True, db_column='benity2_id')
     status = models.CharField(max_length=255, blank=True, db_column='antmaps_category') #for point colors
     type_of_data = models.CharField(max_length=255, blank=True, db_column='type_of_data')
     citation = models.CharField(max_length=255, blank=True, db_column='citation')
