@@ -84,8 +84,13 @@ class SpeciesPoints(models.Model):
     lat = models.CharField(max_length=255, blank=True, db_column='dec_lat')
     lon = models.CharField(max_length=255, blank=True, db_column='dec_long')
     valid_species_name = models.ForeignKey('Species', db_column='valid_species_name', to_field='taxon_code', blank=True, null=True)
-    #bentity = models.ForeignKey('Bentity', db_column='bentity2_id', to_field='bentity2_id', blank=True, null=True)
+    bentity = models.ForeignKey('Bentity', db_column='bentity2_id', blank=True, null=True)
     status = models.CharField(max_length=255, blank=True, db_column='category') #for point colors
+    num_records = models.IntegerField()
+    literature_count = models.IntegerField()
+    museum_count = models.IntegerField()
+    database_count = models.IntegerField()
+    
     
     class Meta:
         managed = False

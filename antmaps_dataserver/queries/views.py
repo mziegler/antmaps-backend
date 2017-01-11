@@ -342,19 +342,47 @@ def species_points(request, format='json'):
             .filter(lat__isnull=False) )
         
         
+        if request.GET.get('lon'):
+            records.filter(lon=request.GET.get('lon'))
+            
+        if request.GET.get('lat'):
+            records.filter(lat=request.GET.get('lat'))
+            
+        if request.GET.get('max_lat'):
+            records.filter(lat__lte=request.GET.get('max_lat'))
+            
+        if request.GET.get('max_lon'):
+                records.filter(lat__lte=request.GET.get('max_lon'))
+        
+        if request.GET.get('min_lat'):
+            records.filter(lat__gte=request.GET.get('max_lat'))
+            
+        if request.GET.get('min_lon'):
+                records.filter(lat__gte=request.GET.get('max_lon'))
+        
+        if request.GET.get('bentity_id'):
+                records.filter(bentity_id=request.GET.get('bentity_id'))        
+        
+        
         # serialize to JSON
         export_objects = [{
             'gabi_acc_number': r.gabi_acc_number,
+            'species': species,
             'lat': r.lat,
             'lon': r.lon,
-            'status':r.status
+            'status':r.status,
+            'bentity_id': r.bentity_id,
+            'num_records': r.num_records,
+            'literature_count': r.literature_count,
+            'museum_count': r.museum_count,
+            'database_count': r.database_count,
         } for r in records]
         
         
         if format == 'csv':
             return CSVResponse(
                 export_objects,
-                fields=('gabi_acc_number', 'lat', 'lon', 'status') )
+                fields=('species', 'lat', 'lon', 'bentity_id', 'status', 'num_records', 'literature_count', 'museum_count', 'database_count') )
         
         else:        
             return JSONResponse({'records': export_objects})
