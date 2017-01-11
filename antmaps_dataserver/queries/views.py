@@ -343,26 +343,30 @@ def species_points(request, format='json'):
         
         
         if request.GET.get('lon'):
-            records.filter(lon=request.GET.get('lon'))
+            records = records.filter(lon=request.GET.get('lon'))
             
         if request.GET.get('lat'):
-            records.filter(lat=request.GET.get('lat'))
+            records = records.filter(lat=request.GET.get('lat'))
             
         if request.GET.get('max_lat'):
-            records.filter(lat__lte=request.GET.get('max_lat'))
+            records = records.filter(lat__lte=request.GET.get('max_lat'))
             
         if request.GET.get('max_lon'):
-                records.filter(lat__lte=request.GET.get('max_lon'))
+            records = records.filter(lon__lte=request.GET.get('max_lon'))
         
         if request.GET.get('min_lat'):
-            records.filter(lat__gte=request.GET.get('max_lat'))
+            records = records.filter(lat__gte=request.GET.get('min_lat'))
             
         if request.GET.get('min_lon'):
-                records.filter(lat__gte=request.GET.get('max_lon'))
+            records = records.filter(lon__gte=request.GET.get('min_lon'))
         
         if request.GET.get('bentity_id'):
-                records.filter(bentity_id=request.GET.get('bentity_id'))        
+            records = records.filter(bentity_id=request.GET.get('bentity_id'))        
         
+        
+        
+        # fetch all the bentitites at once, so we don't have to hit the database once for each record
+        records = records.prefetch_related('bentity') 
         
         # serialize to JSON
         export_objects = [{
@@ -372,6 +376,7 @@ def species_points(request, format='json'):
             'lon': r.lon,
             'status':r.status,
             'bentity_id': r.bentity_id,
+            'bentity_name': r.bentity.bentity,
             'num_records': r.num_records,
             'literature_count': r.literature_count,
             'museum_count': r.museum_count,
@@ -382,7 +387,7 @@ def species_points(request, format='json'):
         if format == 'csv':
             return CSVResponse(
                 export_objects,
-                fields=('species', 'lat', 'lon', 'bentity_id', 'status', 'num_records', 'literature_count', 'museum_count', 'database_count') )
+                fields=('species', 'lat', 'lon', 'bentity_id', 'bentity_name', 'status', 'num_records', 'literature_count', 'museum_count', 'database_count') )
         
         else:        
             return JSONResponse({'records': export_objects})
