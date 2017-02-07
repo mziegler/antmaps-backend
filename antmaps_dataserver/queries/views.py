@@ -669,11 +669,8 @@ def species_in_common(request, format='json'):
     
     if query_bentity_id:
         bentities = Bentity.objects.raw("""
-            SELECT r2."bentity2_id" AS "bentity2_id", count(distinct r2."valid_species_name") AS "species_count",
-            		sum(r2."literature_count"::int) AS "literature_count", 
-            		sum(r2."museum_count"::int) AS "museum_count",
-            		sum(r2."database_count"::int) AS "database_count",
-            		sum(r2."num_records"::int) AS "num_records" 
+            SELECT r2."bentity2_id" AS "bentity2_id", 
+                count(distinct r2."valid_species_name") AS "species_count"
             FROM "map_species_bentity_pair" AS r1
             INNER JOIN "map_species_bentity_pair" AS r2
             ON r1."valid_species_name" = r2."valid_species_name"
@@ -696,18 +693,16 @@ def species_in_common(request, format='json'):
                 'query_bentity_id': query_bentity_id,
                 'bentity_id': b.gid,
                 'bentity_name': b.bentity,
-                'species_in_common': b.species_count,
-                'num_records':b.num_records,
-                'literature_count':b.literature_count, 
-                'museum_count': b.museum_count,
-                'database_count':b.database_count,
+                'species_in_common': b.species_count
             } for b in bentities],
-            fields=('query_bentity_id', 'bentity_id', 'bentity_name', 'species_in_common', 'num_records', 'literature_count', 'museum_count', 'database_count')   )
+            fields=('query_bentity_id', 'bentity_id', 'bentity_name', 'species_in_common')   )
         
     else:  
         # serialize to JSON
-        json_objects = [{'gid': b.gid, 'species_count': b.species_count,'num_records':b.num_records,
-    'literature_count':b.literature_count, 'museum_count': b.museum_count,'database_count':b.database_count} for b in bentities]
+        json_objects = [{
+            'gid': b.gid, 
+            'species_count': b.species_count
+            } for b in bentities]
         return JSONResponse({'bentities': json_objects})
         
         
