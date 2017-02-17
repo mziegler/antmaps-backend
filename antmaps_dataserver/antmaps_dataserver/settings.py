@@ -160,6 +160,20 @@ REPORT_TO_EMAIL_ADDRESS = os.environ.get('ANTMAPS_REPORT_TO_EMAIL_ADDRESS')
 
 
 
+TEMPLATES = [
+    {
+        'BACKEND': 'django.template.backends.django.DjangoTemplates',
+        'DIRS': [],
+        'APP_DIRS': True,
+        'OPTIONS': {
+            # ... some options here ...
+        },
+    },
+]
+
+
+
+
 
 # use memcached if the ANTMAPS_USE_MEMCACHED environment variable is set
 # (otherwise fall back to Django's default in-memory cache)
