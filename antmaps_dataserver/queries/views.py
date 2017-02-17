@@ -56,6 +56,23 @@ class CSVResponse(HttpResponse):
 
 
 
+def errorResponse(errormessage, format, extraJSON={}):
+    """
+    A nice standardized way to show the user an error message.
+    """    
+    
+    if format == 'csv':
+        return CSVResponse(
+            [{'errormessage': errormessage}],
+            fields=('errormessage',)  )
+            
+    else:
+        json_objects = extraJSON.copy()
+        json_objects['error'] = True
+        json_objects['errormessage'] = errormessage
+        return JSONResponse(json_objects)
+
+
 
 
 def subfamily_list(request, format='json'):
@@ -171,7 +188,7 @@ def species_list(request, format='json'):
     
     # error message if the user didn't supply an argument to filter the species list
     if not filtered: 
-        return JSONResponse({'species': [], 'message': "Please supply a 'genus', 'subfamily', 'bentity', and/or 'bentity2' in the URL query string."})
+        return errorResponse("Please supply a 'genus', 'subfamily', 'bentity', and/or 'bentity2' argument.", format, {"species":[]})
          
     
     # return species list if it was filtered by something
@@ -197,7 +214,8 @@ def species_list(request, format='json'):
 
 
 
-# currently doesn't do anything with the format (not public API)
+# currently doesn't do anything with the format argument
+# (not a part of the public API)
 def antweb_links(request, format='json'):
 	"""
 	Given a taxon code in the URL query string, returns a JSON response with the species,
@@ -393,8 +411,7 @@ def species_points(request, format='json'):
             return JSONResponse({'records': export_objects})
     
     else: # punt if the request doesn't have a taxon_code
-        return JSONResponse({'records': [], 'message': "Please supply a 'species' in the URL query string."})
-        
+        return errorResponse("Please supply a 'species' argument.", format, {'records':[]})
         
         
         
@@ -416,8 +433,7 @@ def species_metadata(request, format='json'):
 			AND "bentity2_id" = %s
 			""",[request.GET.get('taxon_code'),request.GET.get('bentity')])
 	else: # no filter supplied
-		return JSONResponse({'records': [], 'message': "Please supply a 'taxon_code' in the URL query string."})
-		
+		return errorResponse("Please supply a 'taxon_code' argument.", format, {'records':[]})
 		
 	# serialize to JSON    
 	json_objects = [{'gabi_acc_number': r.gabi_acc_number, 'type_of_data': r.type_of_data, 'citation':r.citation} for r in records]
@@ -471,7 +487,7 @@ def citations(request, format='json'):
         
     # error message if the user didn't supply an argument to filter the records
     if not filtered: 
-        return JSONResponse({'records': [], 'message': "Please supply a 'gabi_acc_number', 'species', 'genus', 'subfamily', 'bentity', 'lat', and/or 'lon' in the URL query string."})
+        return errorResponse("Please supply at least one these argument-combinations: 'gabi_acc_number', ('species' and 'bentity_id'), or ('lat' and 'lon').", format, {'records': []})
          
     
     # fetch all the bentitites at once, so we don't have to hit the database once for each record
@@ -530,7 +546,7 @@ def species_range(request, format='json'):
     
    
     else: # punt if the request doesn't have a species
-       return JSONResponse({'records': [], 'message': "Please supply a 'species' argument in the URL query string."})
+       return errorResponse("Please supply a 'species' argument.", format, {'records': []})
     
     
     if format == 'csv':
@@ -682,7 +698,7 @@ def species_in_common(request, format='json'):
     
     
     else:
-        return JSONResponse({'bentities':[], 'message': "Please supply a 'bentity_id' in the URL query string."})
+        return errorResponse("Please supply a 'bentity_id' argument.", format, {'bentities':[]})
       
       
       
