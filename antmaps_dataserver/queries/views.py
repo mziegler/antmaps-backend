@@ -308,6 +308,49 @@ def species_autocomplete(request, format='json'):
 
 
 
+
+
+
+def bentity_autocomplete(request, format='json'):
+    """
+    Return a list of bentities with names containing the query argument 'q'.
+    Return an empty list if no argument given.
+    """
+        
+    if request.GET.get('q'):
+        q = request.GET.get('q')
+        
+        bentities = Bentity.objects.all().order_by('bentity')
+    
+        # split tokens by period or white space
+        q_tokens = split(r'[.\s]+', q)
+   
+        # prefix match for each token in the search string against genus name or species name
+        for token in q_tokens:
+            bentities = bentities.filter(bentity__icontains=token)
+        
+    
+    else:
+        bentities = []
+        
+        
+    if format == 'csv':
+        # Serislize CSV for API
+        return CSVResponse(
+            [{'bentity_id': b.gid, 'bentity_name': b.bentity} for b in bentities],
+            ('bentity_id', 'bentity_name')   )
+    
+    else:
+        # Serialize JSON for bentity-list widget
+        json_objects = [{
+            'bentity_id': b.gid,
+            'bentoty_name': b.bentity,
+            } for b in bentities]
+        return JSONResponse({'bentities' : json_objects})
+
+
+
+
        
        
 
@@ -345,7 +388,7 @@ def bentity_list(request, format='json'):
     
 def species_points(request, format='json'):
     """
-    Return a JSON response with a list of geo points for a species.  For each record,
+    Return a response with a list of geo points for a species.  For each record,
     include a {gabi_acc_number:xxx, lat:xxx, lon:xxx, status:x} object.
     
     A "taxon_code" must be provided in the URL query string, to specify the species.
