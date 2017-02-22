@@ -77,9 +77,10 @@ def errorResponse(errormessage, format, extraJSON={}):
 
 def subfamily_list(request, format='csv'):
     """
-    Return a JSON response with a sorted list of subfamilies.  For each subfamily,
-    include a {key:xxx, display:xxx} with the names to use as a database key, and
-    to display to the user (the same for now.)
+    Return a CSV or JSON response with a sorted list of subfamilies.  
+    
+    JSON: For each subfamily, include a {key:xxx, display:xxx} with the 
+    names to use as a database key, and to display to the user (the same for now.)
     """
     
     subfamilies = ( Subfamily.objects.all()
@@ -104,9 +105,10 @@ def subfamily_list(request, format='csv'):
     
 def genus_list(request, format='csv'):
     """
-    Return a JSON response with a sorted list of genera.  For each genus,
-    include a {key:xxx, display:xxx} with the names to use as a database key, and
-    to display to the user (the same for now.)
+    Return a CSV or JSON response with a sorted list of genera. 
+    
+    JSON:  For each genus, include a {key:xxx, display:xxx} with the names to 
+    use as a database key, and to display to the user (the same for now.)
     
     If there's a "subfamily" provided in the query string, return only genera
     with a subfamily_name matching the supplied genus.
@@ -142,19 +144,17 @@ def genus_list(request, format='csv'):
     
 def species_list(request, format='csv'):
     """
-    Return a JSON response with a sorted list of species.  For each species,
-    include a {key:xxx, display:xxx} with the names to use as a database key, and
-    to display to the user (the same for now.)
+    Return a CSV or JSON response with a sorted list of species. 
     
-    If there's a "genus", "subfamily", "bentity", or "bentity2" in the query 
+    JSON: For each species, include a {key:xxx, display:xxx} with the names to 
+    use as a database key, and to display to the user (the same for now.)
+    
+    If there's a "genus", "subfamily", "bentity_id", or "bentity2_id" in the query 
     string, return only species matching these supplied parameters.  
     
     Bentity and bentity2 functionally both do the same thing, and are useful
     for finding species that are present in both bentities.  If you just need one,
-    use "bentity" instead of "bentity2" for slightly better performance.
-    
-    For now, return an empty list if there's no genus supplied.  (Will probably
-    want to change this behavior later.)
+    use "bentity_id" instead of "bentity2_id" for slightly better performance.
     """
     
     
@@ -188,7 +188,7 @@ def species_list(request, format='csv'):
     
     # error message if the user didn't supply an argument to filter the species list
     if not filtered: 
-        return errorResponse("Please supply a 'genus', 'subfamily', 'bentity', and/or 'bentity2' argument.", format, {"species":[]})
+        return errorResponse("Please supply a 'genus', 'subfamily', 'bentity_id', and/or 'bentity2_id' argument.", format, {"species":[]})
          
     
     # return species list if it was filtered by something
@@ -267,7 +267,8 @@ def species_autocomplete(request, format='csv'):
     a list of species for which the tokens in q are a prefix of the genus name
     or species name.  (Used for species-search autocomplete.)
     
-    For each species, return a {label: -species name-, value: -species_code-} object.
+    JSON: For each species, return a 
+    {label: -species name-, value: -species_code-} object.
     """
     
     if request.GET.get('q'):
@@ -344,7 +345,7 @@ def bentity_autocomplete(request, format='csv'):
         # Serialize JSON for bentity-list widget
         json_objects = [{
             'bentity_id': b.gid,
-            'bentoty_name': b.bentity,
+            'bentity_name': b.bentity,
             } for b in bentities]
         return JSONResponse({'bentities' : json_objects})
 
@@ -356,9 +357,9 @@ def bentity_autocomplete(request, format='csv'):
 
 def bentity_list(request, format='csv'):
     """
-    Return a JSON response with a list of bentities for the diversity mode.
+    Return a CSV or JSON response with a list of bentities for the diversity mode.
     
-    For each subfamily, include a {key:xxx, display:xxx} with the names to 
+    JSON: For each subfamily, include a {key:xxx, display:xxx} with the names to 
     use as a database key, and to display to the user.
     """
        
@@ -388,8 +389,10 @@ def bentity_list(request, format='csv'):
     
 def species_points(request, format='csv'):
     """
-    Return a response with a list of geo points for a species.  For each record,
-    include a {gabi_acc_number:xxx, lat:xxx, lon:xxx, status:x} object.
+    Return a CSV or JSON response with a list of geo points for a species.  
+    
+    JSON: For each record, include a 
+    {gabi_acc_number:xxx, lat:xxx, lon:xxx, status:x} object.
     
     A "species" must be provided in the URL query string, to specify the species.
     """
@@ -620,11 +623,11 @@ def species_range(request, format='csv'):
 
 def species_per_bentity(request, format='csv'):
     """
-    Return a JSON response with a list of bentities, the number of native
+    Return a JSON or CSV response with a list of bentities, the number of native
     species in each bentity, the number of records found in each bentity, 
     and out of the total records what number are museum records, database records,
-    and literature records.  Filter by "genus_name" or "subfamily_name" arguments
-    if present in the URL query string.  If both are presetnt, only "genus_name"
+    and literature records.  Filter by "genus" or "subfamily" arguments
+    if present in the URL query string.  If both are presetnt, only "genus"
     will be used.
     
     This view will query the "map_species_bentity_pair" view if "genus_name" or 
@@ -706,13 +709,13 @@ def species_per_bentity(request, format='csv'):
     
 def species_in_common(request, format='csv'):
     """
-    Given a 'bentity' in the URL query string, return a JSON response with a list
+    Given a 'bentity' in the URL query string, return a CSV or JSON response with a list
     of bentities, a count of how many native species each other bentity has 
     in common with the given bentity, the number of records that are found in other 
     bentities that share species with the selected bentity, and out of the total records 
     what number are museum records, database records, and literature records.
     
-    For each bentity, include {gid:xxx, species_count:xxx, num_records:xxx, 
+    JSON: For each bentity, include {gid:xxx, species_count:xxx, num_records:xxx, 
     literature_count:xxx, museum_count:xxx, database_count:xxx}
     
     If the bentity does not have any species matching the query, there will not
