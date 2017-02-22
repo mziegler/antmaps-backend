@@ -75,7 +75,7 @@ def errorResponse(errormessage, format, extraJSON={}):
 
 
 
-def subfamily_list(request, format='json'):
+def subfamily_list(request, format='csv'):
     """
     Return a JSON response with a sorted list of subfamilies.  For each subfamily,
     include a {key:xxx, display:xxx} with the names to use as a database key, and
@@ -102,7 +102,7 @@ def subfamily_list(request, format='json'):
     
     
     
-def genus_list(request, format='json'):
+def genus_list(request, format='csv'):
     """
     Return a JSON response with a sorted list of genera.  For each genus,
     include a {key:xxx, display:xxx} with the names to use as a database key, and
@@ -140,7 +140,7 @@ def genus_list(request, format='json'):
     
     
     
-def species_list(request, format='json'):
+def species_list(request, format='csv'):
     """
     Return a JSON response with a sorted list of species.  For each species,
     include a {key:xxx, display:xxx} with the names to use as a database key, and
@@ -216,7 +216,7 @@ def species_list(request, format='json'):
 
 # currently doesn't do anything with the format argument
 # (not a part of the public API)
-def antweb_links(request, format='json'):
+def antweb_links(request, format='csv'):
 	"""
 	Given a taxon code in the URL query string, returns a JSON response with the species,
 	genus and subfamily. Outputted JSON is a list with {key:xxx, speciesName: xxx, genusName: xxx, 
@@ -261,7 +261,7 @@ def antweb_links(request, format='json'):
 
 
 @never_cache
-def species_autocomplete(request, format='json'):
+def species_autocomplete(request, format='csv'):
     """
     Given a query 'q' in the URL query string, split q into tokens and return
     a list of species for which the tokens in q are a prefix of the genus name
@@ -311,7 +311,7 @@ def species_autocomplete(request, format='json'):
 
 
 
-def bentity_autocomplete(request, format='json'):
+def bentity_autocomplete(request, format='csv'):
     """
     Return a list of bentities with names containing the query argument 'q'.
     Return an empty list if no argument given.
@@ -354,7 +354,7 @@ def bentity_autocomplete(request, format='json'):
        
        
 
-def bentity_list(request, format='json'):
+def bentity_list(request, format='csv'):
     """
     Return a JSON response with a list of bentities for the diversity mode.
     
@@ -386,7 +386,7 @@ def bentity_list(request, format='json'):
     
     
     
-def species_points(request, format='json'):
+def species_points(request, format='csv'):
     """
     Return a response with a list of geo points for a species.  For each record,
     include a {gabi_acc_number:xxx, lat:xxx, lon:xxx, status:x} object.
@@ -460,7 +460,7 @@ def species_points(request, format='json'):
         
         
 
-def species_metadata(request, format='json'):
+def species_metadata(request, format='csv'):
 	"""
     Return citations?
     
@@ -487,7 +487,7 @@ def species_metadata(request, format='json'):
         
         
         
-def citations(request, format='json'):
+def citations(request, format='csv'):
     """
     Citations -- each record from this resource represents one 
     species-location-citation combination.
@@ -562,7 +562,7 @@ def citations(request, format='json'):
     
         
         
-def species_range(request, format='json'):
+def species_range(request, format='csv'):
     """
     Given a 'species' in the URL query string, return a JSON or CSV response with a
     list of bentities for which that species has a record, along 
@@ -618,7 +618,7 @@ def species_range(request, format='json'):
         
         
 
-def species_per_bentity(request, format='json'):
+def species_per_bentity(request, format='csv'):
     """
     Return a JSON response with a list of bentities, the number of native
     species in each bentity, the number of records found in each bentity, 
@@ -704,7 +704,7 @@ def species_per_bentity(request, format='json'):
     
     
     
-def species_in_common(request, format='json'):
+def species_in_common(request, format='csv'):
     """
     Given a 'bentity' in the URL query string, return a JSON response with a list
     of bentities, a count of how many native species each other bentity has 
