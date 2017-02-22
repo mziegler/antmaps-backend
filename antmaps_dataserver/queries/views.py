@@ -170,15 +170,15 @@ def species_list(request, format='json'):
         species = species.filter(genus_name__subfamily_name=request.GET.get('subfamily').capitalize())
         
     # speciesbentitypair__status='N' for only native species
-    bentity = request.GET.get('bentity_id') or request.GET.get('bentity') # deprecating "bentity"
+    bentity = request.GET.get('bentity_id') 
     if bentity:
         filtered = True
         species = species.filter(speciesbentitypair__bentity=bentity, speciesbentitypair__category='N')
     
     # supply 'bentity2' to get species overlapping between 2 bentities
     # speciesbentitypair__status='N' for only native species    
-    bentity2 = request.GET.get('bentity2_id') or request.GET.get('bentity2') # deprecating "bentity2"
-    if request.GET.get('bentity2'): 
+    bentity2 = request.GET.get('bentity2_id')
+    if bentity2: 
         filtered = True
         species_in_bentity2 = species.filter(speciesbentitypair__bentity=bentity2, speciesbentitypair__category='N').distinct()
         species = species.filter(pk__in=species_in_bentity2) # intersection
@@ -391,11 +391,11 @@ def species_points(request, format='json'):
     Return a response with a list of geo points for a species.  For each record,
     include a {gabi_acc_number:xxx, lat:xxx, lon:xxx, status:x} object.
     
-    A "taxon_code" must be provided in the URL query string, to specify the species.
+    A "species" must be provided in the URL query string, to specify the species.
     """
     
     
-    species = request.GET.get('species') or request.GET.get('taxon_code')
+    species = request.GET.get('species')
     if species:
         records = ( SpeciesPoints.objects
             .filter(valid_species_name=species)
@@ -453,7 +453,7 @@ def species_points(request, format='json'):
         else:        
             return JSONResponse({'records': export_objects})
     
-    else: # punt if the request doesn't have a taxon_code
+    else: # punt if the request doesn't have a species
         return errorResponse("Please supply a 'species' argument.", format, {'records':[]})
         
         
@@ -565,7 +565,7 @@ def citations(request, format='json'):
 def species_range(request, format='json'):
     """
     Given a 'species' in the URL query string, return a JSON or CSV response with a
-    list of bentities for which that species (taxon_code) has a record, along 
+    list of bentities for which that species has a record, along 
     with the category code for each.
     
     Outputted JSON is a list with {gid:xxx, category:xxx} for each bentity where
@@ -574,12 +574,9 @@ def species_range(request, format='json'):
     If the bentity does not have any records for the specified species, there 
     will not be an object for the bentity in the results.
     
-    TODO: change taxon_code to species
     """
-    
-    # TODO: deprecate this
-    # 'species' is the official new API, taxon_code is used by the old front-end code
-    species = request.GET.get('species') or request.GET.get('taxon_code')
+
+    species = request.GET.get('species')
     
     if species:
         # look up category for this species for each bentity from the database        
@@ -643,9 +640,8 @@ def species_per_bentity(request, format='json'):
     
     bentities = []
     
-    #TODO: deprecate genus_name and subfamily_name
-    genus = request.GET.get('genus') or request.GET.get('genus_name')
-    subfamily = request.GET.get('subfamily') or request.GET.get('subfamily_name')
+    genus = request.GET.get('genus')
+    subfamily = request.GET.get('subfamily')
     
     if genus: # use genus name
         bentities = Bentity.objects.raw("""
@@ -723,8 +719,7 @@ def species_in_common(request, format='json'):
     be an object for the bentity in the results.
     """
     
-    # 'bentity_id' is the public API, 'bentity' is to be deprecated
-    query_bentity_id = request.GET.get('bentity_id') or request.GET.get('bentity')
+    query_bentity_id = request.GET.get('bentity_id')
     
     if query_bentity_id:
         bentities = Bentity.objects.raw("""

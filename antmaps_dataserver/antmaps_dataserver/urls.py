@@ -27,19 +27,16 @@ urlpatterns = [
     
 
     # for species mode categories
-    url(r'^species-bentity-categories'+f, queries.views.species_range), # deprecating
     url(r'^species-range'+f, queries.views.species_range),
     
     # for genus and subfamily diversity modes
-    url(r'^species-per-bentity'+f, queries.views.species_per_bentity), # deprecating
-    url(r'^bentity-species-counts'+f, queries.views.species_per_bentity),
+    url(r'^species-per-bentity'+f, queries.views.species_per_bentity),
     
     # for bentity diversity mode
     url(r'^species-in-common'+f, queries.views.species_in_common),
     
     
     # species autocomplete
-    url(r'^species-autocomplete'+f, queries.views.species_autocomplete), # deprecating
     url(r'^species-search'+f, queries.views.species_autocomplete),
     
     # bentity search
@@ -54,12 +51,7 @@ urlpatterns = [
     # citations, for each species-location-paper occurrence
     url(r'^citations'+f, queries.views.citations),
     
-    
-    # for populating taxon select boxes (OLD - to be deprecated)
-    url(r'^subfamily-list'+f, queries.views.subfamily_list),
-    url(r'^genus-list'+f, queries.views.genus_list),
-    url(r'^species-list'+f, queries.views.species_list),
-    url(r'^bentity-list'+f, queries.views.bentity_list),
+
     
     # new URL's for public API
     url(r'^subfamilies'+f, queries.views.subfamily_list),
