@@ -506,7 +506,7 @@ def citations(request, format='csv'):
     """
     
     filtered = False # make sure we're filtering by something
-    records = Record.objects.all() #.order_by('gabi_acc_number')
+    records = Record.objects.distinct() #.order_by('gabi_acc_number')
     
     
     # accession number
@@ -515,16 +515,20 @@ def citations(request, format='csv'):
         records = records.filter(gabi_acc_number=request.GET.get('gabi_acc_number').upper())
     
     # species AND bentity
-    if request.GET.get('species') and request.GET.get('bentity_id'):
+    if request.GET.get('species'):
         filtered = True
+    if request.GET.get('species'): 
         records = records.filter(valid_species_name_id=request.GET.get('species').capitalize())
+    if request.GET.get('bentity_id'):
         records = records.filter(bentity_id=request.GET.get('bentity_id').upper())
     
     # lat and lon
     if request.GET.get('lat') and request.GET.get('lon'):
         filtered = True
-        records = records.filter(lat=request.GET.get('lat'), lon=request.GET.get('lon'))
-    
+    if request.GET.get('lat'):
+        records = records.filter(lat=request.GET.get('lat'))
+    if request.GET.get('lon'):
+        records = records.filter(lon=request.GET.get('lon'))
     
     # status
     if request.GET.get('status'):
