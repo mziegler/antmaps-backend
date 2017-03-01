@@ -462,32 +462,6 @@ def species_points(request, format='csv'):
         
         
         
-
-def species_metadata(request, format='csv'):
-	"""
-    Return citations?
-    
-    Deprecating this in favor of citation_records
-	"""
-	
-	records=[]
-	if request.GET.get('taxon_code'):
-		records = Record.objects.raw("""
-			SELECT "gabi_acc_number", "type_of_data", "citation"
-			FROM "map_record"
-			WHERE "valid_species_name" = %s
-			AND "bentity2_id" = %s
-			""",[request.GET.get('taxon_code'),request.GET.get('bentity')])
-	else: # no filter supplied
-		return errorResponse("Please supply a 'taxon_code' argument.", format, {'records':[]})
-		
-	# serialize to JSON    
-	json_objects = [{'gabi_acc_number': r.gabi_acc_number, 'type_of_data': r.type_of_data, 'citation':r.citation} for r in records]
-	
-	return JSONResponse({'records': json_objects})
-        
-        
-        
         
         
 def citations(request, format='csv'):

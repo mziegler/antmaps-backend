@@ -44,9 +44,6 @@ urlpatterns = [
     
     # get points for a species to plot on map
     url(r'^species-points'+f, queries.views.species_points), 
-    
-    #get metadata for a species for a bentity (deprecating in favor of citation-records)
-    url(r'^species-metadata'+f,queries.views.species_metadata),
 
     # citations, for each species-location-paper occurrence
     url(r'^citations'+f, queries.views.citations),
